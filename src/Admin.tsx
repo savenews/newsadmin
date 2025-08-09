@@ -1663,7 +1663,8 @@ const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder 
         addTicker(suggestions[selectedIndex].id);
       } else if (inputValue.trim()) {
         // 직접 입력한 티커 처리
-        let input = inputValue.trim().toUpperCase();
+        const originalInput = inputValue.trim();
+        let input = originalInput.toUpperCase();
         
         // $ 기호 자동 처리
         // 1. 여러 개의 $가 있으면 하나만 남김
@@ -1675,7 +1676,8 @@ const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder 
         }
         
         // 3. $ 기호가 없으면 자동으로 추가
-        if (!input.startsWith('$')) {
+        const wasAutoAdded = !input.startsWith('$');
+        if (wasAutoAdded) {
           input = '$' + input;
         }
         
@@ -1690,7 +1692,11 @@ const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder 
           addTicker(existingTicker.id);
         } else {
           // 새 티커 자동 생성
-          const confirmed = window.confirm(`'${tickerSymbol}' 티커가 존재하지 않습니다. 새로 등록하시겠습니까?`);
+          const displayMessage = wasAutoAdded 
+            ? `'${originalInput.toUpperCase()}'를 '${tickerSymbol}' 티커로 등록하시겠습니까?\n($ 기호가 자동으로 추가됩니다)`
+            : `'${tickerSymbol}' 티커가 존재하지 않습니다. 새로 등록하시겠습니까?`;
+          
+          const confirmed = window.confirm(displayMessage);
           if (confirmed) {
             setIsCreatingTicker(true);
             try {
@@ -1710,6 +1716,10 @@ const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder 
               // 새로 생성된 티커 추가
               if (newTicker.tag?.id) {
                 console.log(`'${tickerSymbol}' 티커가 성공적으로 등록되었습니다.`);
+                // 자동으로 $ 기호가 추가되었음을 사용자에게 알림
+                if (wasAutoAdded) {
+                  console.log(`입력하신 '${originalInput.toUpperCase()}'가 '${tickerSymbol}'로 등록되었습니다.`);
+                }
                 addTicker(newTicker.tag.id);
               }
             } catch (error: any) {
