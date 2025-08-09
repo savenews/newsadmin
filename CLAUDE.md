@@ -2,6 +2,38 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## GitHub Repository Information
+
+### Git 설정 정보
+- **GitHub Repository URL**: https://github.com/savenews/newsadmin
+- **GitHub Username**: savenews
+- **GitHub Token**: [환경변수 또는 별도 보안 파일에 저장]
+- **Default Branch**: main
+- **Remote Name**: origin
+
+### Git 명령어 (다음에 바로 사용 가능)
+```bash
+# Remote는 이미 토큰과 함께 설정되어 있음
+# 현재 remote 확인: git remote -v
+
+# 변경사항 커밋 및 푸시
+git add .
+git commit -m "커밋 메시지"
+git push origin main
+
+# 또는 한 번에
+git add . && git commit -m "커밋 메시지" && git push
+
+# 토큰을 새로 설정해야 할 경우 (사용자가 제공 시)
+git remote set-url origin https://[TOKEN]@github.com/savenews/newsadmin.git
+```
+
+### 주의사항
+- GitHub 토큰은 보안상 이 파일에 직접 저장하지 않음
+- Remote는 이미 인증 정보와 함께 설정되어 있어 바로 push 가능
+- 새로운 기능 추가 후 항상 커밋 메시지에 변경 내용 명확히 기록
+- 토큰이 필요한 경우 사용자가 직접 제공해야 함
+
 ## Project Overview
 
 This is a React-based admin dashboard for the SaveNews platform. The entire admin interface is implemented in a single TSX file for rapid development and easy maintenance.
