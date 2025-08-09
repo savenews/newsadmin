@@ -1623,7 +1623,7 @@ interface TickerInputProps {
   placeholder?: string;
 }
 
-const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder = "티커를 입력하세요 (예: NVDA)" }) => {
+const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder = "티커를 입력하세요 (예: $NVDA, $AAPL)" }) => {
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -1643,7 +1643,7 @@ const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder 
 
   const suggestions = useMemo(() => {
     if (!inputValue || !tickerTags) return [];
-    const input = inputValue.toLowerCase().replace('$', '');
+    const input = inputValue.toLowerCase();
     return tickerTags
       .filter((tag: any) => 
         tag.name.toLowerCase().includes(input) && 
@@ -1659,7 +1659,15 @@ const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder 
         addTicker(suggestions[selectedIndex].id);
       } else if (inputValue.trim()) {
         // 직접 입력한 티커 처리
-        const tickerSymbol = inputValue.trim().toUpperCase().replace('$', '');
+        const input = inputValue.trim().toUpperCase();
+        
+        // $ 기호가 없으면 경고
+        if (!input.startsWith('$')) {
+          alert('티커는 반드시 $ 기호로 시작해야 합니다. (예: $NVDA, $AAPL)');
+          return;
+        }
+        
+        const tickerSymbol = input; // $ 기호 포함
         
         // 이미 존재하는 티커인지 확인
         const existingTicker = tickerTags.find((t: any) => 
@@ -1676,7 +1684,7 @@ const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder 
             try {
               const newTicker = await api.createTag({
                 name: tickerSymbol,
-                description: `${tickerSymbol} 기업 티커`,
+                description: `${tickerSymbol.replace('$', '')} 기업 티커`,
                 is_ticker: true,
                 is_required: false
               });
@@ -2482,12 +2490,13 @@ const NewsManagement: React.FC = () => {
                 <div style={styles.formGroup}>
                   <label style={styles.label}>기업 티커 💹</label>
                   <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '8px' }}>
-                    티커를 입력하고 Enter를 누르세요. 없는 티커는 자동으로 등록됩니다. 등록 후 바로 Enter를 누르시면 선택됩니다.
+                    <strong style={{ color: '#EF4444' }}>⚠️ 티커는 반드시 $ 기호를 포함해서 입력하세요</strong> (예: $NVDA, $AAPL)<br/>
+                    티커를 입력하고 Enter를 누르세요. 없는 티커는 자동으로 등록됩니다.
                   </div>
                   <TickerInput
                     value={selectedTickers}
                     onChange={setSelectedTickers}
-                    placeholder="티커를 입력하세요 (예: NVDA)"
+                    placeholder="티커를 입력하세요 (예: $NVDA, $AAPL)"
                   />
                 </div>
                 
@@ -3049,12 +3058,13 @@ const ReportManagement: React.FC = () => {
                 <div style={styles.formGroup}>
                   <label style={styles.label}>기업 티커 💹</label>
                   <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '8px' }}>
-                    티커를 입력하고 Enter를 누르세요. 없는 티커는 자동으로 등록됩니다. 등록 후 바로 Enter를 누르시면 선택됩니다.
+                    <strong style={{ color: '#EF4444' }}>⚠️ 티커는 반드시 $ 기호를 포함해서 입력하세요</strong> (예: $NVDA, $AAPL)<br/>
+                    티커를 입력하고 Enter를 누르세요. 없는 티커는 자동으로 등록됩니다.
                   </div>
                   <TickerInput
                     value={selectedTickers}
                     onChange={setSelectedTickers}
-                    placeholder="티커를 입력하세요 (예: NVDA)"
+                    placeholder="티커를 입력하세요 (예: $NVDA, $AAPL)"
                   />
                 </div>
               </div>
