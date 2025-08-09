@@ -4926,12 +4926,8 @@ const CommunityManagement: React.FC = () => {
       </div>
 
       {isModalOpen && (
-        <div style={styles.modal} onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            closeModal();
-          }
-        }}>
-          <div style={{ ...styles.modalContent, maxWidth: '800px' }} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.modal}>
+          <div style={{ ...styles.modalContent, maxWidth: '800px' }}>
             <div style={{...styles.modalHeader, position: 'relative'}}>
               <h2 style={styles.modalTitle}>{editingPost ? '게시글 수정' : '게시글 작성'}</h2>
               <button
@@ -5470,12 +5466,8 @@ const TagManagement: React.FC = () => {
       </div>
 
       {isModalOpen && (
-        <div style={styles.modal} onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            closeModal();
-          }
-        }}>
-          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
             <div style={{...styles.modalHeader, position: 'relative'}}>
               <h2 style={styles.modalTitle}>
                 {editingTag ? (activeTab === 'tags' ? '태그 수정' : '티커 수정') : (activeTab === 'tags' ? '태그 추가' : '티커 추가')}
