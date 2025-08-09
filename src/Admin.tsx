@@ -3348,8 +3348,11 @@ const CalendarManagement: React.FC = () => {
 
   const createMutation = useMutation({
     mutationFn: api.createCalendarEvent,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['calendar'] });
+    onSuccess: async () => {
+      // 모든 calendar 관련 쿼리 무효화
+      await queryClient.invalidateQueries({ queryKey: ['calendar'] });
+      // 현재 표시 중인 날짜 범위에 대한 쿼리도 강제 새로고침
+      await queryClient.refetchQueries({ queryKey: ['calendar', startDate, endDate] });
       alert('일정이 성공적으로 등록되었습니다.');
       localStorage.removeItem('calendarFormDraft'); // 성공 시 임시 저장 삭제
       closeModal();
@@ -3361,8 +3364,11 @@ const CalendarManagement: React.FC = () => {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: api.CalendarEventData }) => api.updateCalendarEvent(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['calendar'] });
+    onSuccess: async () => {
+      // 모든 calendar 관련 쿼리 무효화
+      await queryClient.invalidateQueries({ queryKey: ['calendar'] });
+      // 현재 표시 중인 날짜 범위에 대한 쿼리도 강제 새로고침
+      await queryClient.refetchQueries({ queryKey: ['calendar', startDate, endDate] });
       alert('일정이 성공적으로 수정되었습니다.');
       localStorage.removeItem('calendarFormDraft'); // 성공 시 임시 저장 삭제
       closeModal();
@@ -3374,8 +3380,11 @@ const CalendarManagement: React.FC = () => {
 
   const deleteMutation = useMutation({
     mutationFn: api.deleteCalendarEvent,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['calendar'] });
+    onSuccess: async () => {
+      // 모든 calendar 관련 쿼리 무효화
+      await queryClient.invalidateQueries({ queryKey: ['calendar'] });
+      // 현재 표시 중인 날짜 범위에 대한 쿼리도 강제 새로고침
+      await queryClient.refetchQueries({ queryKey: ['calendar', startDate, endDate] });
       alert('일정이 성공적으로 삭제되었습니다.');
     },
     onError: (error: any) => {
@@ -4618,8 +4627,10 @@ const CommunityManagement: React.FC = () => {
 
   const createMutation = useMutation({
     mutationFn: api.createCommunityPost,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['community'] });
+    onSuccess: async () => {
+      // 모든 community 관련 쿼리 무효화 및 새로고침
+      await queryClient.invalidateQueries({ queryKey: ['community'] });
+      await queryClient.refetchQueries({ queryKey: ['community', page, searchTerm, selectedCategory] });
       alert('게시글이 성공적으로 등록되었습니다.');
       localStorage.removeItem('communityFormDraft'); // 성공 시 임시 저장 삭제
       closeModal();
@@ -4638,8 +4649,10 @@ const CommunityManagement: React.FC = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: api.CommunityUpdateData }) => 
       api.updateCommunityPost(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['community'] });
+    onSuccess: async () => {
+      // 모든 community 관련 쿼리 무효화 및 새로고침
+      await queryClient.invalidateQueries({ queryKey: ['community'] });
+      await queryClient.refetchQueries({ queryKey: ['community', page, searchTerm, selectedCategory] });
       alert('게시글이 성공적으로 수정되었습니다.');
       localStorage.removeItem('communityFormDraft'); // 성공 시 임시 저장 삭제
       closeModal();
@@ -4657,8 +4670,10 @@ const CommunityManagement: React.FC = () => {
 
   const deleteMutation = useMutation({
     mutationFn: api.deleteCommunityPost,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['community'] });
+    onSuccess: async () => {
+      // 모든 community 관련 쿼리 무효화 및 새로고침
+      await queryClient.invalidateQueries({ queryKey: ['community'] });
+      await queryClient.refetchQueries({ queryKey: ['community', page, searchTerm, selectedCategory] });
       alert('게시글이 성공적으로 삭제되었습니다.');
     },
     onError: (error: any) => {
@@ -5135,8 +5150,9 @@ const TagManagement: React.FC = () => {
   const createMutation = useMutation({
     mutationFn: api.createTag,
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ['tags'] });
-      queryClient.invalidateQueries({ queryKey: ['tags-management'] });
+      // 모든 tags 관련 쿼리 무효화 및 새로고침
+      await queryClient.invalidateQueries({ queryKey: ['tags'] });
+      await queryClient.invalidateQueries({ queryKey: ['tags-management'] });
       await refetch();
       alert('태그가 성공적으로 등록되었습니다.');
       localStorage.removeItem('tagFormDraft'); // 성공 시 임시 저장 삭제
@@ -5156,8 +5172,9 @@ const TagManagement: React.FC = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => api.updateTag(id, data),
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ['tags'] });
-      queryClient.invalidateQueries({ queryKey: ['tags-management'] });
+      // 모든 tags 관련 쿼리 무효화 및 새로고침
+      await queryClient.invalidateQueries({ queryKey: ['tags'] });
+      await queryClient.invalidateQueries({ queryKey: ['tags-management'] });
       await refetch();
       alert('태그가 성공적으로 수정되었습니다.');
       localStorage.removeItem('tagFormDraft'); // 성공 시 임시 저장 삭제
@@ -5177,8 +5194,9 @@ const TagManagement: React.FC = () => {
   const deleteMutation = useMutation({
     mutationFn: api.deleteTag,
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ['tags'] });
-      queryClient.invalidateQueries({ queryKey: ['tags-management'] });
+      // 모든 tags 관련 쿼리 무효화 및 새로고침
+      await queryClient.invalidateQueries({ queryKey: ['tags'] });
+      await queryClient.invalidateQueries({ queryKey: ['tags-management'] });
       await refetch();
       alert('태그가 성공적으로 삭제되었습니다.');
     },
