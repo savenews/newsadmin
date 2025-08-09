@@ -3504,9 +3504,13 @@ const CalendarManagement: React.FC = () => {
     // Convert HTML to content blocks
     const contentBlocks = convertHtmlToContentBlocks(htmlContent);
 
-    // 로컬 시간대를 고려한 ISO 형식 변환
-    const localDateTime = new Date(combinedDateTime);
-    const eventDate = localDateTime.toISOString();
+    // 한국 시간(KST, UTC+9)을 기준으로 처리
+    // 사용자가 입력한 시간을 한국 시간으로 간주하고 UTC로 변환
+    const kstDateTime = new Date(combinedDateTime + '+09:00');
+    const eventDate = kstDateTime.toISOString();
+    
+    console.log('입력한 날짜/시간:', combinedDateTime);
+    console.log('전송할 ISO 시간:', eventDate);
     
     const eventData: api.CalendarEventData = {
       title: formData.title,
