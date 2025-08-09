@@ -3590,13 +3590,20 @@ const CalendarManagement: React.FC = () => {
     
     // Apply date range filter
     if (filterDateStart && filterDateEnd) {
-      const startDate = new Date(filterDateStart);
-      const endDate = new Date(filterDateEnd);
-      endDate.setHours(23, 59, 59, 999);
+      const startDate = new Date(filterDateStart + 'T00:00:00');
+      const endDate = new Date(filterDateEnd + 'T23:59:59');
       
       filteredEvents = filteredEvents.filter((event: any) => {
         const eventDate = new Date(event.event_date);
-        return eventDate >= startDate && eventDate <= endDate;
+        // 로컬 날짜로 비교
+        const eventLocalDate = new Date(
+          eventDate.getFullYear(),
+          eventDate.getMonth(),
+          eventDate.getDate(),
+          eventDate.getHours(),
+          eventDate.getMinutes()
+        );
+        return eventLocalDate >= startDate && eventLocalDate <= endDate;
       });
     }
     
@@ -3630,7 +3637,12 @@ const CalendarManagement: React.FC = () => {
   if (data?.events) {
     data.events.forEach((event: any) => {
       const eventDate = new Date(event.event_date);
-      const dateKey = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}`;
+      // 로컬 날짜 기준으로 dateKey 생성
+      const year = eventDate.getFullYear();
+      const month = String(eventDate.getMonth() + 1).padStart(2, '0');
+      const day = String(eventDate.getDate()).padStart(2, '0');
+      const dateKey = `${year}-${month}-${day}`;
+      
       if (!eventsMap[dateKey]) {
         eventsMap[dateKey] = [];
       }
