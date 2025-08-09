@@ -1379,7 +1379,9 @@ const TagInput: React.FC<TagInputProps> = ({ value, onChange, placeholder = "태
           type="text"
           value={inputValue}
           onChange={(e) => {
-            setInputValue(e.target.value);
+            // 입력값 정리: 연속된 $를 하나로
+            let value = e.target.value.replace(/\$+/g, '$');
+            setInputValue(value);
             setShowSuggestions(true);
             setSelectedIndex(-1);
           }}
@@ -1623,7 +1625,7 @@ interface TickerInputProps {
   placeholder?: string;
 }
 
-const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder = "티커를 입력하세요 (예: $NVDA, $AAPL)" }) => {
+const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder = "티커를 입력하세요 (예: NVDA 또는 $NVDA)" }) => {
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -1643,12 +1645,14 @@ const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder 
 
   const suggestions = useMemo(() => {
     if (!inputValue || !tickerTags) return [];
-    const input = inputValue.toLowerCase();
+    // 사용자 입력에서 $ 제거하고 검색 (사용자가 $ 없이 입력해도 검색되도록)
+    const input = inputValue.toLowerCase().replace(/\$/g, '');
     return tickerTags
-      .filter((tag: any) => 
-        tag.name.toLowerCase().includes(input) && 
-        !value.includes(tag.id)
-      )
+      .filter((tag: any) => {
+        // 티커 이름에서도 $ 제거하고 비교
+        const tagName = tag.name.toLowerCase().replace(/\$/g, '');
+        return tagName.includes(input) && !value.includes(tag.id);
+      })
       .slice(0, 8);
   }, [inputValue, tickerTags, value]);
 
@@ -1659,15 +1663,23 @@ const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder 
         addTicker(suggestions[selectedIndex].id);
       } else if (inputValue.trim()) {
         // 직접 입력한 티커 처리
-        const input = inputValue.trim().toUpperCase();
+        let input = inputValue.trim().toUpperCase();
         
-        // $ 기호가 없으면 경고
-        if (!input.startsWith('$')) {
-          alert('티커는 반드시 $ 기호로 시작해야 합니다. (예: $NVDA, $AAPL)');
-          return;
+        // $ 기호 자동 처리
+        // 1. 여러 개의 $가 있으면 하나만 남김
+        input = input.replace(/\$+/g, '$');
+        
+        // 2. $ 기호가 중간이나 끝에 있으면 맨 앞으로 이동
+        if (input.includes('$') && !input.startsWith('$')) {
+          input = '$' + input.replace(/\$/g, '');
         }
         
-        const tickerSymbol = input; // $ 기호 포함
+        // 3. $ 기호가 없으면 자동으로 추가
+        if (!input.startsWith('$')) {
+          input = '$' + input;
+        }
+        
+        const tickerSymbol = input; // 정리된 티커 심볼 (항상 $ 포함)
         
         // 이미 존재하는 티커인지 확인
         const existingTicker = tickerTags.find((t: any) => 
@@ -2490,13 +2502,13 @@ const NewsManagement: React.FC = () => {
                 <div style={styles.formGroup}>
                   <label style={styles.label}>기업 티커 💹</label>
                   <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '8px' }}>
-                    <strong style={{ color: '#EF4444' }}>⚠️ 티커는 반드시 $ 기호를 포함해서 입력하세요</strong> (예: $NVDA, $AAPL)<br/>
-                    티커를 입력하고 Enter를 누르세요. 없는 티커는 자동으로 등록됩니다.
+                    티커를 입력하고 Enter를 누르세요. (예: NVDA, AAPL 또는 $NVDA, $AAPL)<br/>
+                    <span style={{ color: '#10B981' }}>✓ $ 기호는 자동으로 추가됩니다</span>
                   </div>
                   <TickerInput
                     value={selectedTickers}
                     onChange={setSelectedTickers}
-                    placeholder="티커를 입력하세요 (예: $NVDA, $AAPL)"
+                    placeholder="티커를 입력하세요 (예: NVDA 또는 $NVDA)"
                   />
                 </div>
                 
@@ -3058,13 +3070,13 @@ const ReportManagement: React.FC = () => {
                 <div style={styles.formGroup}>
                   <label style={styles.label}>기업 티커 💹</label>
                   <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '8px' }}>
-                    <strong style={{ color: '#EF4444' }}>⚠️ 티커는 반드시 $ 기호를 포함해서 입력하세요</strong> (예: $NVDA, $AAPL)<br/>
-                    티커를 입력하고 Enter를 누르세요. 없는 티커는 자동으로 등록됩니다.
+                    티커를 입력하고 Enter를 누르세요. (예: NVDA, AAPL 또는 $NVDA, $AAPL)<br/>
+                    <span style={{ color: '#10B981' }}>✓ $ 기호는 자동으로 추가됩니다</span>
                   </div>
                   <TickerInput
                     value={selectedTickers}
                     onChange={setSelectedTickers}
-                    placeholder="티커를 입력하세요 (예: $NVDA, $AAPL)"
+                    placeholder="티커를 입력하세요 (예: NVDA 또는 $NVDA)"
                   />
                 </div>
               </div>
