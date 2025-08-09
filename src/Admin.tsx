@@ -3397,18 +3397,26 @@ const CalendarManagement: React.FC = () => {
       setEditingEvent(event);
       // Convert ISO date to datetime-local format
       const eventDate = event.event_date ? new Date(event.event_date).toISOString().slice(0, 16) : '';
-      // 날짜와 시간 분리 (로컬 시간대 고려)
+      // 날짜와 시간 분리 (KST 시간대 고려)
       if (event.event_date) {
+        // API에서 받은 UTC 시간을 Date 객체로 변환
         const dateObj = new Date(event.event_date);
-        // 로컬 날짜와 시간 추출
-        const year = dateObj.getFullYear();
-        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const day = String(dateObj.getDate()).padStart(2, '0');
-        const hours = String(dateObj.getHours()).padStart(2, '0');
-        const minutes = String(dateObj.getMinutes()).padStart(2, '0');
         
-        setSelectedDate(`${year}-${month}-${day}`);
-        setSelectedTime(`${hours}:${minutes}`);
+        // toLocaleString을 사용하여 KST로 변환된 날짜/시간 추출
+        const kstString = dateObj.toLocaleString('en-CA', {
+          timeZone: 'Asia/Seoul',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
+        
+        // 날짜와 시간 분리 (YYYY-MM-DD, HH:mm 형식)
+        const [datePart, timePart] = kstString.split(', ');
+        setSelectedDate(datePart);
+        setSelectedTime(timePart);
       }
       setFormData({
         title: event.title || '',
@@ -3513,13 +3521,22 @@ const CalendarManagement: React.FC = () => {
     // Convert HTML to content blocks
     const contentBlocks = convertHtmlToContentBlocks(htmlContent);
 
-    // 한국 시간(KST, UTC+9)을 기준으로 처리
-    // 사용자가 입력한 시간을 한국 시간으로 간주하고 UTC로 변환
-    const kstDateTime = new Date(combinedDateTime + '+09:00');
-    const eventDate = kstDateTime.toISOString();
+    // 문제 분석:
+    // - 사용자가 18시 입력 → 서버에 09시로 저장됨 → 표시할 때 09시로 나옴
+    // - 서버가 받은 시간을 그대로 저장하고, 그대로 반환하는 것으로 보임
+    // - 해결: 입력 시간에 +9시간을 더해서 전송
     
-    console.log('입력한 날짜/시간:', combinedDateTime);
-    console.log('전송할 ISO 시간:', eventDate);
+    const localDate = new Date(combinedDateTime);
+    // UTC로 변환하지 않고, KST 시간에 9시간을 더해서 전송
+    // 18시 입력 → 27시(익일 03시)로 전송 → 서버가 27시로 저장 → 표시할 때 27-9=18시
+    localDate.setHours(localDate.getHours() + 9);
+    const eventDate = localDate.toISOString();
+    
+    console.log('=== 캘린더 시간 전송 (보정) ===');
+    console.log('사용자 입력 (KST):', combinedDateTime);
+    console.log('+9시간 보정 후:', localDate.toString());
+    console.log('서버 전송 (ISO):', eventDate);
+    console.log('===========================');
     
     const eventData: api.CalendarEventData = {
       title: formData.title,
@@ -3541,16 +3558,27 @@ const CalendarManagement: React.FC = () => {
     }
   };
 
-  // Format date for display
+  // Format date for display (UTC를 KST로 변환)
   const formatEventDate = (dateString: string) => {
     if (!dateString) return '-';
+    
+    // 서버에서 UTC 시간을 받음 (Z 접미사 또는 +00:00)
     const date = new Date(dateString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return '-';
+    }
+    
+    // KST로 변환하여 표시
     return date.toLocaleString('ko-KR', {
+      timeZone: 'Asia/Seoul',
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
+      hour12: true
     });
   };
 
@@ -3650,11 +3678,17 @@ const CalendarManagement: React.FC = () => {
   if (data?.events) {
     data.events.forEach((event: any) => {
       const eventDate = new Date(event.event_date);
-      // 로컬 날짜 기준으로 dateKey 생성
-      const year = eventDate.getFullYear();
-      const month = String(eventDate.getMonth() + 1).padStart(2, '0');
-      const day = String(eventDate.getDate()).padStart(2, '0');
-      const dateKey = `${year}-${month}-${day}`;
+      
+      // KST 시간대로 날짜 변환
+      const kstDateString = eventDate.toLocaleString('en-CA', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      
+      // YYYY-MM-DD 형식으로 dateKey 생성
+      const dateKey = kstDateString.split(',')[0]; // en-CA locale은 YYYY-MM-DD 형식 반환
       
       if (!eventsMap[dateKey]) {
         eventsMap[dateKey] = [];
