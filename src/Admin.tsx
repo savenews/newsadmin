@@ -3388,11 +3388,18 @@ const CalendarManagement: React.FC = () => {
       setEditingEvent(event);
       // Convert ISO date to datetime-local format
       const eventDate = event.event_date ? new Date(event.event_date).toISOString().slice(0, 16) : '';
-      // 날짜와 시간 분리
-      if (eventDate) {
+      // 날짜와 시간 분리 (로컬 시간대 고려)
+      if (event.event_date) {
         const dateObj = new Date(event.event_date);
-        setSelectedDate(dateObj.toISOString().split('T')[0]);
-        setSelectedTime(dateObj.toTimeString().slice(0, 5));
+        // 로컬 날짜와 시간 추출
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const hours = String(dateObj.getHours()).padStart(2, '0');
+        const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+        
+        setSelectedDate(`${year}-${month}-${day}`);
+        setSelectedTime(`${hours}:${minutes}`);
       }
       setFormData({
         title: event.title || '',
@@ -3486,9 +3493,8 @@ const CalendarManagement: React.FC = () => {
     }
     
     // 날짜와 시간을 합쳐서 event_date 설정
-    const combinedDateTime = `${selectedDate}T${selectedTime}`;
-    formData.event_date = combinedDateTime;
-
+    const combinedDateTime = `${selectedDate}T${selectedTime}:00`; // 초 추가
+    
     // Validate HTML content
     if (!htmlContent || htmlContent === '<p><br></p>' || htmlContent.trim() === '') {
       alert('내용을 입력해주세요.');
@@ -3498,8 +3504,9 @@ const CalendarManagement: React.FC = () => {
     // Convert HTML to content blocks
     const contentBlocks = convertHtmlToContentBlocks(htmlContent);
 
-    // Convert datetime-local to ISO format with timezone
-    const eventDate = new Date(formData.event_date).toISOString();
+    // 로컬 시간대를 고려한 ISO 형식 변환
+    const localDateTime = new Date(combinedDateTime);
+    const eventDate = localDateTime.toISOString();
     
     const eventData: api.CalendarEventData = {
       title: formData.title,
@@ -4084,8 +4091,8 @@ const CalendarManagement: React.FC = () => {
           <EmptyState message="검색 결과가 없습니다." icon="" />
         ) : (
           <>
-            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: '14px', color: colors.gray[600] }}>
+            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', backgroundColor: '#F9FAFB', borderRadius: '8px' }}>
+              <div style={{ fontSize: '14px', color: colors.gray[700], fontWeight: '500' }}>
                 총 {filteredEvents.length}개의 일정
                 {clickedDate && (
                   <span style={{ marginLeft: '12px', color: colors.primary }}>
@@ -4245,12 +4252,8 @@ const CalendarManagement: React.FC = () => {
       </div>
 
       {isModalOpen && (
-        <div style={styles.modal} onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            closeModal();
-          }
-        }}>
-          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
             <div style={{...styles.modalHeader, position: 'relative'}}>
               <h2 style={styles.modalTitle}>{editingEvent ? '일정 수정' : '일정 추가'}</h2>
               <button
