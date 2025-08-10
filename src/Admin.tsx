@@ -2435,27 +2435,21 @@ const NewsManagement: React.FC = () => {
                             style={{ 
                               ...styles.actionButton, 
                               ...styles.editButton,
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px',
                             }}
                             onClick={() => openModal(news)}
                             title="뉴스 수정"
                           >
-                            ✏️ 수정
+                            수정
                           </button>
                           <button
                             style={{ 
                               ...styles.actionButton, 
                               ...styles.deleteButton,
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px',
                             }}
                             onClick={() => handleDelete(news.id)}
                             title="뉴스 삭제"
                           >
-                            🗑️ 삭제
+                            삭제
                           </button>
                         </div>
                       </td>
