@@ -2284,7 +2284,6 @@ const NewsManagement: React.FC = () => {
     
     const errors = [];
     if (!formData.title) errors.push('• 제목을 입력해주세요');
-    if (!formData.source) errors.push('• 출처를 입력해주세요');
     if (!htmlContent || htmlContent === '<p><br></p>' || htmlContent.trim() === '') {
       errors.push('• 내용을 입력해주세요');
     }
@@ -2573,13 +2572,12 @@ const NewsManagement: React.FC = () => {
                 </div>
                 
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>출처 *</label>
+                  <label style={styles.label}>출처</label>
                   <input
                     style={styles.input}
                     value={formData.source}
                     onChange={(e) => setFormData({ ...formData, source: e.target.value })}
                     placeholder="뉴스 출처 (예: 한국경제, 매일경제 등)"
-                    required
                   />
                 </div>
 
