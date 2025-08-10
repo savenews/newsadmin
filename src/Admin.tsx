@@ -656,17 +656,36 @@ if (typeof document !== 'undefined' && !document.getElementById('admin-global-st
 }
 
 // Loading Spinner Component
-const LoadingSpinner: React.FC = () => (
+const LoadingSpinner: React.FC<{ message?: string }> = ({ message = '데이터를 불러오는 중...' }) => (
   <div style={styles.loadingContainer}>
     <div style={styles.spinner} />
+    <p style={{ marginTop: '16px', color: colors.gray[600], fontSize: '14px' }}>{message}</p>
   </div>
 );
 
 // Empty State Component
-const EmptyState: React.FC<{ message: string; icon?: string }> = ({ message, icon = '' }) => (
+const EmptyState: React.FC<{ message: string; icon?: string; actionText?: string; onAction?: () => void }> = ({ message, icon = '📋', actionText, onAction }) => (
   <div style={styles.emptyState}>
     {icon && <div style={styles.emptyStateIcon}>{icon}</div>}
     <div style={styles.emptyStateText}>{message}</div>
+    {actionText && onAction && (
+      <button
+        onClick={onAction}
+        style={{
+          marginTop: '16px',
+          padding: '10px 20px',
+          backgroundColor: colors.primary,
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          fontWeight: '500',
+        }}
+      >
+        {actionText}
+      </button>
+    )}
   </div>
 );
 
@@ -1969,6 +1988,10 @@ const NewsManagement: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedTickers, setSelectedTickers] = useState<string[]>([]);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState<'title' | 'created_at' | 'view_count'>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [isSaving, setIsSaving] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -1987,9 +2010,19 @@ const NewsManagement: React.FC = () => {
   }, [formData, htmlContent, selectedTags, selectedTickers, isModalOpen, editingNews]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['news', page],
-    queryFn: () => api.getNews(undefined, page),
+    queryKey: ['news', page, searchQuery, sortField, sortOrder],
+    queryFn: () => api.getNews(searchQuery || undefined, page, 20, `${sortField}_${sortOrder}`),
   });
+
+  // 정렬 핸들러
+  const handleSort = (field: 'title' | 'created_at' | 'view_count') => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('desc');
+    }
+  };
 
   const { data: tagsData } = useQuery({
     queryKey: ['tags'],
@@ -1998,6 +2031,8 @@ const NewsManagement: React.FC = () => {
 
   const createMutation = useMutation({
     mutationFn: api.createNews,
+    onMutate: () => setIsSaving(true),
+    onSettled: () => setIsSaving(false),
     onSuccess: async (data) => {
       console.log('뉴스 생성 응답:', data);
       
@@ -2056,6 +2091,8 @@ const NewsManagement: React.FC = () => {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: api.NewsData }) => api.updateNews(id, data),
+    onMutate: () => setIsSaving(true),
+    onSettled: () => setIsSaving(false),
     onSuccess: () => {
       // localStorage 임시 저장 데이터 삭제
       localStorage.removeItem('newsFormDraft');
@@ -2245,19 +2282,15 @@ const NewsManagement: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title) {
-      alert('제목은 필수입니다.');
-      return;
+    const errors = [];
+    if (!formData.title) errors.push('• 제목을 입력해주세요');
+    if (!formData.source) errors.push('• 출처를 입력해주세요');
+    if (!htmlContent || htmlContent === '<p><br></p>' || htmlContent.trim() === '') {
+      errors.push('• 내용을 입력해주세요');
     }
     
-    if (!formData.source) {
-      alert('출처는 필수입니다.');
-      return;
-    }
-
-    // Validate HTML content
-    if (!htmlContent || htmlContent === '<p><br></p>' || htmlContent.trim() === '') {
-      alert('내용을 입력해주세요.');
+    if (errors.length > 0) {
+      alert('필수 항목을 확인해주세요:\n\n' + errors.join('\n'));
       return;
     }
     
@@ -2293,9 +2326,13 @@ const NewsManagement: React.FC = () => {
     };
 
     if (editingNews) {
-      updateMutation.mutate({ id: editingNews.id, data: newsData });
+      if (window.confirm('뉴스를 수정하시겠습니까?')) {
+        updateMutation.mutate({ id: editingNews.id, data: newsData });
+      }
     } else {
-      createMutation.mutate(newsData);
+      if (window.confirm('뉴스를 등록하시겠습니까?')) {
+        createMutation.mutate(newsData);
+      }
     }
   };
 
@@ -2314,28 +2351,57 @@ const NewsManagement: React.FC = () => {
     <div>
       <div style={styles.pageHeader}>
         <h1 style={styles.pageTitle}>뉴스 관리</h1>
-        <button style={styles.addButton} onClick={() => openModal()}>
-          <span>+</span> 뉴스 추가
-        </button>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="뉴스 검색..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1); // 검색 시 첫 페이지로 이동
+            }}
+            style={{
+              padding: '10px 16px',
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '8px',
+              fontSize: '14px',
+              width: '250px',
+            }}
+          />
+          <button style={styles.addButton} onClick={() => openModal()}>
+            <span>+</span> 뉴스 추가
+          </button>
+        </div>
       </div>
       
       <div style={styles.tableContainer}>
         {data?.news_list?.length === 0 ? (
-          <EmptyState message="등록된 뉴스가 없습니다." icon="" />
+          <EmptyState 
+            message="아직 등록된 뉴스가 없습니다" 
+            icon="📰" 
+            actionText="첫 뉴스 작성하기"
+            onAction={() => openModal()}
+          />
         ) : (
           <>
             <div style={styles.tableWrapper}>
               <table style={styles.table}>
                 <thead>
                   <tr>
-                    <th style={styles.th}>ID</th>
-                    <th style={styles.th}>제목</th>
-                    <th style={styles.th}>출처</th>
-                    <th style={styles.th}>작성자</th>
-                    <th style={styles.th}>작성일</th>
-                    <th style={styles.th}>조회수</th>
-                    <th style={styles.th}>댓글</th>
-                    <th style={styles.th}>액션</th>
+                    <th style={{...styles.th, width: '15%'}}>ID</th>
+                    <th style={{...styles.th, width: '25%', cursor: 'pointer'}} onClick={() => handleSort('title')}>
+                      제목 {sortField === 'title' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th style={{...styles.th, width: '10%'}}>출처</th>
+                    <th style={{...styles.th, width: '10%'}}>작성자</th>
+                    <th style={{...styles.th, width: '12%', cursor: 'pointer'}} onClick={() => handleSort('created_at')}>
+                      작성일 {sortField === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th style={{...styles.th, width: '8%', cursor: 'pointer'}} onClick={() => handleSort('view_count')}>
+                      조회수 {sortField === 'view_count' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th style={{...styles.th, width: '8%'}}>댓글</th>
+                    <th style={{...styles.th, width: '12%'}}>액션</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2367,16 +2433,30 @@ const NewsManagement: React.FC = () => {
                       <td style={styles.td}>
                         <div style={styles.actionButtons}>
                           <button
-                            style={{ ...styles.actionButton, ...styles.editButton }}
+                            style={{ 
+                              ...styles.actionButton, 
+                              ...styles.editButton,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}
                             onClick={() => openModal(news)}
+                            title="뉴스 수정"
                           >
-                            수정
+                            ✏️ 수정
                           </button>
                           <button
-                            style={{ ...styles.actionButton, ...styles.deleteButton }}
+                            style={{ 
+                              ...styles.actionButton, 
+                              ...styles.deleteButton,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}
                             onClick={() => handleDelete(news.id)}
+                            title="뉴스 삭제"
                           >
-                            삭제
+                            🗑️ 삭제
                           </button>
                         </div>
                       </td>
@@ -2406,7 +2486,10 @@ const NewsManagement: React.FC = () => {
             }}
           >
             <div style={{...styles.modalHeader, position: 'relative'}}>
-              <h2 style={styles.modalTitle}>{editingNews ? '뉴스 수정' : '뉴스 추가'}</h2>
+              <h2 style={styles.modalTitle}>
+                {editingNews ? '뉴스 수정' : '뉴스 추가'}
+                {isSaving && <span style={{ fontSize: '14px', color: colors.gray[500], marginLeft: '12px' }}>저장 중...</span>}
+              </h2>
               <button
                 type="button"
                 onClick={() => {
@@ -2550,10 +2633,12 @@ const NewsManagement: React.FC = () => {
                   style={{
                     ...styles.button,
                     width: 'auto',
+                    opacity: isSaving ? 0.6 : 1,
+                    cursor: isSaving ? 'not-allowed' : 'pointer',
                   }}
-                  disabled={createMutation.isPending || updateMutation.isPending}
+                  disabled={isSaving}
                 >
-                  {createMutation.isPending || updateMutation.isPending ? '저장 중...' : '저장'}
+                  {isSaving ? '처리 중...' : (editingNews ? '수정하기' : '등록하기')}
                 </button>
               </div>
             </form>
