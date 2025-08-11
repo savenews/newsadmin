@@ -1124,7 +1124,7 @@ const convertHtmlToContentBlocks = (html: string): api.NewsContent[] => {
             blocks.push({
               type: 'image',
               url: imageUrl,
-              content: imageUrl, // content 필드에도 URL 저장
+              content: '', // content는 빈 문자열로 설정
               alt: imgElement.alt || ''
             });
             
@@ -1163,7 +1163,7 @@ const convertHtmlToContentBlocks = (html: string): api.NewsContent[] => {
         blocks.push({
           type: 'image',
           url: imageUrl,
-          content: imageUrl,
+          content: '', // content는 빈 문자열로 설정
           alt: imgElement.alt || ''
         });
       }
@@ -1204,7 +1204,7 @@ const convertContentBlocksToHtml = (blocks: api.NewsContent[]): string => {
       return `<p>${block.content}</p>`;
     } else if (block.type === 'image') {
       // Convert relative URL to absolute URL for display
-      let imageUrl = block.url || block.content; // content 필드도 확인
+      let imageUrl = block.url;
       
       if (!imageUrl) {
         console.error('Image block has no URL:', block);
@@ -1223,7 +1223,8 @@ const convertContentBlocksToHtml = (blocks: api.NewsContent[]): string => {
       console.log('Image block:', block);
       console.log('Converted image URL:', imageUrl);
       
-      return `<p><img src="${imageUrl}" alt="${block.alt || ''}" /></p>`;
+      // 이미지를 별도의 블록으로 처리 (P 태그로 감싸지 않음)
+      return `<img src="${imageUrl}" alt="${block.alt || ''}" />`;
     }
     return '';
   }).join('');
