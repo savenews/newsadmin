@@ -1075,75 +1075,114 @@ const convertHtmlToContentBlocks = (html: string): api.NewsContent[] => {
     return [{ type: 'text', content: '' }];
   }
   
+  console.log('Converting HTML to content blocks:', html);
+  
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
   
   const blocks: api.NewsContent[] = [];
-  const walker = document.createTreeWalker(
-    tempDiv,
-    NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
-    null
-  );
   
-  let currentTextContent = '';
-  let node: Node | null;
-  
-  while (node = walker.nextNode()) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const text = node.textContent?.trim() || '';
-      if (text) {
-        currentTextContent += text + ' ';
-      }
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
+  // 모든 직접 자식 요소들을 순회
+  tempDiv.childNodes.forEach((node) => {
+    if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node as HTMLElement;
       
-      // 이미지 처리
-      if (element.tagName === 'IMG') {
-        // 현재까지의 텍스트가 있으면 먼저 추가
-        if (currentTextContent.trim()) {
-          blocks.push({ type: 'text', content: currentTextContent.trim() });
-          currentTextContent = '';
-        }
+      // P 태그나 DIV 태그 처리
+      if (['P', 'DIV'].includes(element.tagName)) {
+        // 이미지를 포함하는지 확인
+        const images = element.querySelectorAll('img');
         
-        const img = element as HTMLImageElement;
-        // Extract relative URL from absolute URL if needed
-        let imageUrl = img.src;
+        if (images.length > 0) {
+          // 이미지가 있는 경우
+          let lastProcessedIndex = 0;
+          const htmlContent = element.innerHTML;
+          
+          images.forEach((img) => {
+            const imgElement = img as HTMLImageElement;
+            const imgOuterHTML = imgElement.outerHTML;
+            const imgIndex = htmlContent.indexOf(imgOuterHTML);
+            
+            // 이미지 앞의 텍스트 처리
+            if (imgIndex > lastProcessedIndex) {
+              const textBefore = htmlContent.substring(lastProcessedIndex, imgIndex);
+              const tempSpan = document.createElement('span');
+              tempSpan.innerHTML = textBefore;
+              const text = tempSpan.textContent?.trim();
+              if (text) {
+                blocks.push({ type: 'text', content: text });
+              }
+            }
+            
+            // 이미지 처리
+            let imageUrl = imgElement.src;
+            if (imageUrl.startsWith(API_BASE_URL)) {
+              imageUrl = imageUrl.replace(API_BASE_URL, '');
+            }
+            
+            console.log('Processing image:', imageUrl);
+            
+            blocks.push({
+              type: 'image',
+              url: imageUrl,
+              content: imageUrl, // content 필드에도 URL 저장
+              alt: imgElement.alt || ''
+            });
+            
+            lastProcessedIndex = imgIndex + imgOuterHTML.length;
+          });
+          
+          // 마지막 이미지 뒤의 텍스트 처리
+          if (lastProcessedIndex < htmlContent.length) {
+            const textAfter = htmlContent.substring(lastProcessedIndex);
+            const tempSpan = document.createElement('span');
+            tempSpan.innerHTML = textAfter;
+            const text = tempSpan.textContent?.trim();
+            if (text) {
+              blocks.push({ type: 'text', content: text });
+            }
+          }
+        } else {
+          // 텍스트만 있는 경우
+          const text = element.textContent?.trim();
+          if (text) {
+            blocks.push({ type: 'text', content: text });
+          }
+        }
+      }
+      // 독립적인 IMG 태그
+      else if (element.tagName === 'IMG') {
+        const imgElement = element as HTMLImageElement;
+        let imageUrl = imgElement.src;
+        
         if (imageUrl.startsWith(API_BASE_URL)) {
           imageUrl = imageUrl.replace(API_BASE_URL, '');
         }
         
+        console.log('Processing standalone image:', imageUrl);
+        
         blocks.push({
           type: 'image',
           url: imageUrl,
-          content: img.alt || '',
-          alt: img.alt || ''
+          content: imageUrl,
+          alt: imgElement.alt || ''
         });
       }
-      // 블록 레벨 요소에서 텍스트 구분
-      else if (['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE'].includes(element.tagName)) {
-        const text = element.textContent?.trim() || '';
-        if (text && !element.querySelector('img')) {
-          if (currentTextContent.trim()) {
-            blocks.push({ type: 'text', content: currentTextContent.trim() });
-            currentTextContent = '';
-          }
+      // 기타 블록 요소
+      else if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE'].includes(element.tagName)) {
+        const text = element.textContent?.trim();
+        if (text) {
           blocks.push({ type: 'text', content: text });
-          // Skip children as we already got the text
-          while (walker.nextNode() && walker.currentNode !== element) {
-            if (walker.currentNode.parentNode === element) {
-              continue;
-            }
-            break;
-          }
         }
       }
+    } else if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent?.trim();
+      if (text) {
+        blocks.push({ type: 'text', content: text });
+      }
     }
-  }
+  });
   
-  // 남은 텍스트 추가
-  if (currentTextContent.trim()) {
-    blocks.push({ type: 'text', content: currentTextContent.trim() });
-  }
+  console.log('Converted content blocks:', blocks);
   
   return blocks.length > 0 ? blocks : [{ type: 'text', content: '' }];
 };
