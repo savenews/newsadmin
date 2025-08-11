@@ -1223,8 +1223,8 @@ const convertContentBlocksToHtml = (blocks: api.NewsContent[]): string => {
       console.log('Image block:', block);
       console.log('Converted image URL:', imageUrl);
       
-      // 이미지를 별도의 블록으로 처리 (P 태그로 감싸지 않음)
-      return `<img src="${imageUrl}" alt="${block.alt || ''}" />`;
+      // Quill 에디터에서 표시하기 위해 P 태그로 감싸기
+      return `<p><img src="${imageUrl}" alt="${block.alt || ''}" /></p>`;
     }
     return '';
   }).join('');
