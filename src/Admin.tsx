@@ -39,6 +39,21 @@ const colors = {
   success: '#10B981',
   error: '#EF4444',
   warning: '#F59E0B',
+  green: {
+    600: '#059669',
+  },
+  blue: {
+    600: '#2563EB',
+  },
+  purple: {
+    600: '#9333EA',
+  },
+  orange: {
+    600: '#EA580C',
+  },
+  indigo: {
+    600: '#4F46E5',
+  },
   info: '#3B82F6',
 };
 

@@ -198,9 +198,8 @@ export interface CalendarContentText {
 
 export interface CalendarContentImage {
   type: 'image';
-  content: string;
   url: string;
-  alt?: string;
+  alt: string | null;
 }
 
 export type CalendarContent = CalendarContentText | CalendarContentImage;
