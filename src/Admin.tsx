@@ -947,10 +947,12 @@ const RichEditor: React.FC<RichEditorProps> = ({ value, onChange, placeholder })
           // Remove loading text and insert image
           if (range) {
             quillRef.current?.getEditor().deleteText(range.index, '이미지 업로드 중...'.length);
-            // API returns file_url
-            const imageUrl = uploadedData.file_url;
+            
+            // API may return different field names: file_url, url, or image_url
+            const imageUrl = uploadedData.file_url || uploadedData.url || uploadedData.image_url;
             if (!imageUrl) {
-              throw new Error('업로드 응답에 file_url이 없습니다');
+              console.error('업로드 응답 전체:', uploadedData);
+              throw new Error('업로드 응답에 이미지 URL이 없습니다. 응답: ' + JSON.stringify(uploadedData));
             }
             
             // Convert relative URL to absolute URL

@@ -333,6 +333,9 @@ export const uploadImage = async (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
   
+  console.log('Uploading image to:', `${API_BASE_URL}/api/uploads/image`);
+  console.log('File details:', { name: file.name, type: file.type, size: file.size });
+  
   const token = localStorage.getItem('access_token');
   const response = await fetch(`${API_BASE_URL}/api/uploads/image`, {
     method: 'POST',
@@ -342,17 +345,22 @@ export const uploadImage = async (file: File) => {
     body: formData,
   });
   
+  console.log('Upload response status:', response.status);
+  
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
+    console.error('Upload error response:', errorData);
     if (response.status === 401) {
       localStorage.removeItem('access_token');
       localStorage.removeItem('user_info');
       window.location.href = '/';
     }
-    throw new Error(errorData?.detail || `Upload Error: ${response.status}`);
+    throw new Error(errorData?.detail || errorData?.message || `Upload Error: ${response.status}`);
   }
   
-  return response.json();
+  const data = await response.json();
+  console.log('Upload success response:', data);
+  return data;
 };
 
 // Community content types
