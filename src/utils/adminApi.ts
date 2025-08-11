@@ -59,9 +59,8 @@ export interface NewsContentText {
 
 export interface NewsContentImage {
   type: 'image';
-  content: string;
   url: string;
-  alt?: string;
+  alt: string | null;
 }
 
 export type NewsContent = NewsContentText | NewsContentImage;
@@ -119,9 +118,8 @@ export interface ReportContentText {
 
 export interface ReportContentImage {
   type: 'image';
-  content: string;
   url: string;
-  alt?: string;
+  alt: string | null;
 }
 
 export type ReportContent = ReportContentText | ReportContentImage;
@@ -371,9 +369,8 @@ export interface CommunityContentText {
 
 export interface CommunityContentImage {
   type: 'image';
-  content: string;
   url: string;
-  alt?: string;
+  alt: string | null;
 }
 
 export type CommunityContent = CommunityContentText | CommunityContentImage;

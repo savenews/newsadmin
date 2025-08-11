@@ -1124,9 +1124,8 @@ const convertHtmlToContentBlocks = (html: string): api.NewsContent[] => {
             blocks.push({
               type: 'image',
               url: imageUrl,
-              content: imageUrl, // 프론트엔드 호환을 위해 content에도 URL 저장
-              alt: imgElement.alt || ''
-            });
+              alt: imgElement.alt || null
+            } as api.NewsContent);
             
             lastProcessedIndex = imgIndex + imgOuterHTML.length;
           });
@@ -1163,9 +1162,8 @@ const convertHtmlToContentBlocks = (html: string): api.NewsContent[] => {
         blocks.push({
           type: 'image',
           url: imageUrl,
-          content: imageUrl, // 프론트엔드 호환을 위해 content에도 URL 저장
-          alt: imgElement.alt || ''
-        });
+          alt: imgElement.alt || null
+        } as api.NewsContent);
       }
       // 기타 블록 요소
       else if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE'].includes(element.tagName)) {
@@ -1204,8 +1202,7 @@ const convertContentBlocksToHtml = (blocks: api.NewsContent[]): string => {
       return `<p>${block.content}</p>`;
     } else if (block.type === 'image') {
       // Convert relative URL to absolute URL for display
-      // url 필드를 우선적으로 사용하고, 없으면 content 필드 사용
-      let imageUrl = block.url || block.content;
+      let imageUrl = block.url;
       
       if (!imageUrl) {
         console.error('Image block has no URL:', block);
