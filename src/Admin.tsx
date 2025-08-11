@@ -5884,120 +5884,184 @@ const StatisticsManagement: React.FC = () => {
     title, 
     value, 
     subtitle,
-    color = colors.primary 
+    color = colors.gray[800]
   }) => (
     <div style={{
       backgroundColor: colors.white,
-      borderRadius: '12px',
-      padding: '24px',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-      flex: '1',
-      minWidth: '200px',
+      border: `1px solid ${colors.gray[200]}`,
+      borderRadius: '8px',
+      padding: '20px',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+      position: 'relative' as const,
+      overflow: 'hidden',
     }}>
-      <div style={{ fontSize: '14px', color: colors.gray[600], marginBottom: '8px' }}>{title}</div>
-      <div style={{ fontSize: '32px', fontWeight: '700', color, marginBottom: '4px' }}>
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '3px',
+        backgroundColor: color,
+      }} />
+      <div style={{ fontSize: '13px', color: colors.gray[500], marginBottom: '12px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</div>
+      <div style={{ fontSize: '28px', fontWeight: '700', color: colors.gray[900], marginBottom: '8px', lineHeight: '1' }}>
         {typeof value === 'number' ? value.toLocaleString() : value}
       </div>
       {subtitle && (
-        <div style={{ fontSize: '12px', color: colors.gray[500] }}>{subtitle}</div>
+        <div style={{ fontSize: '12px', color: colors.gray[400], lineHeight: '1.4' }}>{subtitle}</div>
       )}
     </div>
   );
 
   return (
-    <div>
-      <div style={styles.pageHeader}>
-        <h1 style={styles.pageTitle}>통계정보</h1>
-        <div style={{ fontSize: '14px', color: colors.gray[500] }}>
+    <div style={{ padding: '0', maxWidth: '100%' }}>
+      <div style={{ marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: colors.gray[900], marginBottom: '8px' }}>통계</h1>
+        <div style={{ fontSize: '13px', color: colors.gray[500] }}>
           마지막 업데이트: {new Date(data.timestamp).toLocaleString('ko-KR')}
         </div>
       </div>
 
       {/* 사용자 통계 */}
-      <div style={{ marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px', color: colors.gray[800] }}>
-          👥 사용자 통계
-        </h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ marginBottom: '40px' }}>
+        <div style={{ 
+          marginBottom: '20px',
+          paddingBottom: '12px',
+          borderBottom: `2px solid ${colors.gray[200]}`
+        }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '600', color: colors.gray[800] }}>
+            사용자 현황
+          </h2>
+        </div>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gap: '12px'
+        }} className="stat-grid">
           <StatCard 
-            title="현재 접속 중" 
+            title="현재 접속" 
             value={user_statistics.online_users} 
             subtitle="실시간 사용자"
             color={colors.green[600]}
           />
           <StatCard 
-            title="전체 회원" 
-            value={user_statistics.total_users} 
-            subtitle={`신규 가입 +${user_statistics.new_users_today} (오늘)`}
-          />
-          <StatCard 
             title="오늘 활동" 
             value={user_statistics.today_active} 
-            subtitle="오늘 활동한 사용자"
+            subtitle="24시간 내"
+            color={colors.blue[600]}
           />
           <StatCard 
             title="주간 활동" 
             value={user_statistics.week_active} 
-            subtitle={`신규 가입 +${user_statistics.new_users_week} (이번 주)`}
+            subtitle="7일간"
+            color={colors.purple[600]}
           />
           <StatCard 
             title="월간 활동" 
             value={user_statistics.month_active} 
-            subtitle="이번 달 활동한 사용자"
+            subtitle="30일간"
+            color={colors.orange[600]}
+          />
+          <StatCard 
+            title="전체 회원" 
+            value={user_statistics.total_users} 
+            subtitle="누적 가입자"
+            color={colors.gray[700]}
+          />
+          <StatCard 
+            title="오늘 신규" 
+            value={user_statistics.new_users_today} 
+            subtitle="24시간 내 가입"
+            color={colors.primary}
+          />
+          <StatCard 
+            title="주간 신규" 
+            value={user_statistics.new_users_week} 
+            subtitle="7일간 가입"
+            color={colors.secondary}
           />
         </div>
       </div>
 
       {/* 게시물 통계 */}
-      <div>
-        <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px', color: colors.gray[800] }}>
-          📊 게시물 통계
-        </h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ marginBottom: '40px' }}>
+        <div style={{ 
+          marginBottom: '20px',
+          paddingBottom: '12px',
+          borderBottom: `2px solid ${colors.gray[200]}`
+        }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '600', color: colors.gray[800] }}>
+            콘텐츠 현황
+          </h2>
+        </div>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gap: '12px'
+        }} className="stat-grid">
+          <StatCard 
+            title="오늘 뉴스" 
+            value={post_statistics.news_today} 
+            subtitle="24시간 내"
+            color={colors.blue[600]}
+          />
+          <StatCard 
+            title="오늘 커뮤니티" 
+            value={post_statistics.community_today} 
+            subtitle="24시간 내"
+            color={colors.purple[600]}
+          />
+          <StatCard 
+            title="오늘 전체" 
+            value={post_statistics.total_posts_today} 
+            subtitle="뉴스+커뮤니티"
+            color={colors.green[600]}
+          />
+          <StatCard 
+            title="주간 뉴스" 
+            value={post_statistics.news_week} 
+            subtitle="7일간"
+            color={colors.orange[600]}
+          />
+          <StatCard 
+            title="주간 커뮤니티" 
+            value={post_statistics.community_week} 
+            subtitle="7일간"
+            color={colors.indigo[600]}
+          />
+          <StatCard 
+            title="주간 전체" 
+            value={post_statistics.total_posts_week} 
+            subtitle="뉴스+커뮤니티"
+            color={colors.secondary}
+          />
+          <StatCard 
+            title="오늘 댓글" 
+            value={post_statistics.comments_today} 
+            subtitle="24시간 내"
+            color={colors.primary}
+          />
           <StatCard 
             title="전체 뉴스" 
             value={post_statistics.total_news} 
-            subtitle={`오늘 +${post_statistics.news_today} / 주간 +${post_statistics.news_week}`}
-            color={colors.blue[600]}
+            subtitle="누적"
+            color={colors.gray[700]}
           />
           <StatCard 
             title="전체 커뮤니티" 
             value={post_statistics.total_community} 
-            subtitle={`오늘 +${post_statistics.community_today} / 주간 +${post_statistics.community_week}`}
-            color={colors.purple[600]}
+            subtitle="누적"
+            color={colors.gray[600]}
           />
           <StatCard 
             title="전체 댓글" 
             value={post_statistics.total_comments} 
-            subtitle={`오늘 +${post_statistics.comments_today}`}
-            color={colors.orange[600]}
-          />
-          <StatCard 
-            title="오늘 게시물" 
-            value={post_statistics.total_posts_today} 
-            subtitle={`뉴스 ${post_statistics.news_today} + 커뮤니티 ${post_statistics.community_today}`}
-            color={colors.green[600]}
-          />
-          <StatCard 
-            title="주간 게시물" 
-            value={post_statistics.total_posts_week} 
-            subtitle={`뉴스 ${post_statistics.news_week} + 커뮤니티 ${post_statistics.community_week}`}
-            color={colors.indigo[600]}
+            subtitle="누적"
+            color={colors.gray[500]}
           />
         </div>
       </div>
 
-      {/* 차트 영역 (향후 추가 가능) */}
-      <div style={{ 
-        marginTop: '32px', 
-        padding: '24px', 
-        backgroundColor: colors.gray[50], 
-        borderRadius: '12px',
-        textAlign: 'center',
-        color: colors.gray[500]
-      }}>
-        <p>📈 차트 및 그래프 기능은 추후 업데이트 예정입니다.</p>
-      </div>
     </div>
   );
 };
@@ -6007,7 +6071,7 @@ const MobileNav: React.FC<{ activeTab: string; setActiveTab: (tab: string) => vo
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { id: 'statistics', label: '통계정보', icon: '📊' },
+    { id: 'statistics', label: '통계', icon: '' },
     { id: 'news', label: '뉴스 관리', icon: '' },
     { id: 'report', label: '리포트 관리', icon: '' },
     { id: 'user', label: '회원 관리', icon: '' },
@@ -6195,7 +6259,7 @@ const AdminApp: React.FC = () => {
                 onMouseEnter={() => setHoveredNavItem('statistics')}
                 onMouseLeave={() => setHoveredNavItem(null)}
               >
-                통계정보
+                통계
               </button>
               <button
                 style={{
