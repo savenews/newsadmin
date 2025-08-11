@@ -1165,7 +1165,12 @@ const convertContentBlocksToHtml = (blocks: api.NewsContent[]): string => {
       return `<p>${block.content}</p>`;
     } else if (block.type === 'image') {
       // Convert relative URL to absolute URL for display
-      let imageUrl = block.url;
+      let imageUrl = block.url || block.content; // content 필드도 확인
+      
+      if (!imageUrl) {
+        console.error('Image block has no URL:', block);
+        return '';
+      }
       
       // URL 처리 로직 개선
       if (!imageUrl.startsWith('http')) {
@@ -1179,7 +1184,7 @@ const convertContentBlocksToHtml = (blocks: api.NewsContent[]): string => {
       console.log('Image block:', block);
       console.log('Converted image URL:', imageUrl);
       
-      return `<p><img src="${imageUrl}" alt="${block.alt || block.content || ''}" /></p>`;
+      return `<p><img src="${imageUrl}" alt="${block.alt || ''}" /></p>`;
     }
     return '';
   }).join('');
@@ -2168,11 +2173,16 @@ const NewsManagement: React.FC = () => {
             }
           }
           
-          // 티커와 일반 태그 분리
+          // 티커와 일반 태그 분리 (중복 제거)
           const regularTagIds: string[] = [];
           const tickerIds: string[] = [];
           
-          allTagIds.forEach((tagId: string) => {
+          // 중복 제거
+          const uniqueTagIds = allTagIds.filter((tagId, index, self) => 
+            self.indexOf(tagId) === index
+          );
+          
+          uniqueTagIds.forEach((tagId: string) => {
             const tagInfo = tagsData?.tags?.find((t: any) => t.id === tagId);
             if (tagInfo && tagInfo.is_ticker) {
               tickerIds.push(tagId);
@@ -2180,6 +2190,9 @@ const NewsManagement: React.FC = () => {
               regularTagIds.push(tagId);
             }
           });
+          
+          console.log('Separated regular tags:', regularTagIds);
+          console.log('Separated ticker tags:', tickerIds);
           
           setSelectedTags(regularTagIds);
           setSelectedTickers(tickerIds);
@@ -2209,18 +2222,37 @@ const NewsManagement: React.FC = () => {
         // Convert tag names to IDs
         console.log('Fallback news tags:', news.tag_names);
         if (news.tag_names && news.tag_names.length > 0) {
-          const tagIds = news.tag_names.map((tagName: string) => {
+          const regularTagIds: string[] = [];
+          const tickerIds: string[] = [];
+          
+          news.tag_names.forEach((tagName: string) => {
             const tag = tagsData?.tags?.find((t: any) => t.name === tagName);
-            return tag?.id;
-          }).filter((id: string) => id);
-          console.log('Fallback converted tag IDs:', tagIds);
-          setSelectedTags(tagIds);
+            if (tag) {
+              if (tag.is_ticker) {
+                // 중복 체크
+                if (!tickerIds.includes(tag.id)) {
+                  tickerIds.push(tag.id);
+                }
+              } else {
+                if (!regularTagIds.includes(tag.id)) {
+                  regularTagIds.push(tag.id);
+                }
+              }
+            }
+          });
+          
+          console.log('Fallback regular tags:', regularTagIds);
+          console.log('Fallback ticker tags:', tickerIds);
+          setSelectedTags(regularTagIds);
+          setSelectedTickers(tickerIds);
         } else if (news.tags && news.tags.length > 0) {
           // 만약 tag_names가 없지만 tags가 있는 경우
           console.log('Using news.tags:', news.tags);
           setSelectedTags(news.tags);
+          setSelectedTickers([]);
         } else {
           setSelectedTags([]);
+          setSelectedTickers([]);
         }
         setHtmlContent(news.content ? `<p>${news.content}</p>` : '');
       }
@@ -2768,11 +2800,16 @@ const ReportManagement: React.FC = () => {
             }).filter((id: string) => id);
           }
           
-          // 티커와 일반 태그 분리
+          // 티커와 일반 태그 분리 (중복 제거)
           const regularTagIds: string[] = [];
           const tickerIds: string[] = [];
           
-          allTagIds.forEach((tagId: string) => {
+          // 중복 제거
+          const uniqueTagIds = allTagIds.filter((tagId, index, self) => 
+            self.indexOf(tagId) === index
+          );
+          
+          uniqueTagIds.forEach((tagId: string) => {
             const tagInfo = tagsData?.tags?.find((t: any) => t.id === tagId);
             if (tagInfo && tagInfo.is_ticker) {
               tickerIds.push(tagId);
@@ -2780,6 +2817,9 @@ const ReportManagement: React.FC = () => {
               regularTagIds.push(tagId);
             }
           });
+          
+          console.log('Separated regular tags:', regularTagIds);
+          console.log('Separated ticker tags:', tickerIds);
           
           setSelectedTags(regularTagIds);
           setSelectedTickers(tickerIds);
