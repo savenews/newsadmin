@@ -5868,10 +5868,12 @@ const TagManagement: React.FC = () => {
 
 // Statistics Management Component  
 const StatisticsManagement: React.FC = () => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['statistics'],
     queryFn: api.getSystemStatistics,
-    refetchInterval: 30000, // 30초마다 자동 새로고침
+    refetchInterval: 60000 * 5, // 5분마다 자동 새로고침
+    refetchOnWindowFocus: false, // 창 포커스 시 자동 갱신 비활성화
+    staleTime: 60000 * 2, // 2분간 데이터를 신선한 것으로 간주
   });
 
   if (isLoading) return <LoadingSpinner />;
@@ -5916,9 +5918,36 @@ const StatisticsManagement: React.FC = () => {
   return (
     <div style={{ padding: '0', maxWidth: '100%' }}>
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '700', color: colors.gray[900], marginBottom: '8px' }}>통계</h1>
-        <div style={{ fontSize: '13px', color: colors.gray[500] }}>
-          마지막 업데이트: {new Date(data.timestamp).toLocaleString('ko-KR')}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h1 style={{ fontSize: '24px', fontWeight: '700', color: colors.gray[900], marginBottom: '8px' }}>통계</h1>
+            <div style={{ fontSize: '13px', color: colors.gray[500] }}>
+              마지막 업데이트: {new Date(data.timestamp).toLocaleString('ko-KR')}
+            </div>
+          </div>
+          <button
+            onClick={() => refetch()}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: colors.white,
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '6px',
+              color: colors.gray[700],
+              fontSize: '14px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = colors.gray[50];
+              e.currentTarget.style.borderColor = colors.gray[400];
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = colors.white;
+              e.currentTarget.style.borderColor = colors.gray[300];
+            }}
+          >
+            새로고침
+          </button>
         </div>
       </div>
 
