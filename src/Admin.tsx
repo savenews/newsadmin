@@ -5851,11 +5851,148 @@ const TagManagement: React.FC = () => {
   );
 };
 
+// Statistics Management Component  
+const StatisticsManagement: React.FC = () => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['statistics'],
+    queryFn: api.getSystemStatistics,
+    refetchInterval: 30000, // 30초마다 자동 새로고침
+  });
+
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <div style={styles.errorContainer}>통계 데이터를 불러오는데 실패했습니다.</div>;
+  if (!data) return null;
+
+  const { user_statistics, post_statistics } = data;
+
+  const StatCard: React.FC<{ title: string; value: number | string; subtitle?: string; color?: string }> = ({ 
+    title, 
+    value, 
+    subtitle,
+    color = colors.primary 
+  }) => (
+    <div style={{
+      backgroundColor: colors.white,
+      borderRadius: '12px',
+      padding: '24px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+      flex: '1',
+      minWidth: '200px',
+    }}>
+      <div style={{ fontSize: '14px', color: colors.gray[600], marginBottom: '8px' }}>{title}</div>
+      <div style={{ fontSize: '32px', fontWeight: '700', color, marginBottom: '4px' }}>
+        {typeof value === 'number' ? value.toLocaleString() : value}
+      </div>
+      {subtitle && (
+        <div style={{ fontSize: '12px', color: colors.gray[500] }}>{subtitle}</div>
+      )}
+    </div>
+  );
+
+  return (
+    <div>
+      <div style={styles.pageHeader}>
+        <h1 style={styles.pageTitle}>통계정보</h1>
+        <div style={{ fontSize: '14px', color: colors.gray[500] }}>
+          마지막 업데이트: {new Date(data.timestamp).toLocaleString('ko-KR')}
+        </div>
+      </div>
+
+      {/* 사용자 통계 */}
+      <div style={{ marginBottom: '32px' }}>
+        <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px', color: colors.gray[800] }}>
+          👥 사용자 통계
+        </h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+          <StatCard 
+            title="현재 접속 중" 
+            value={user_statistics.online_users} 
+            subtitle="실시간 사용자"
+            color={colors.green[600]}
+          />
+          <StatCard 
+            title="전체 회원" 
+            value={user_statistics.total_users} 
+            subtitle={`신규 가입 +${user_statistics.new_users_today} (오늘)`}
+          />
+          <StatCard 
+            title="오늘 활동" 
+            value={user_statistics.today_active} 
+            subtitle="오늘 활동한 사용자"
+          />
+          <StatCard 
+            title="주간 활동" 
+            value={user_statistics.week_active} 
+            subtitle={`신규 가입 +${user_statistics.new_users_week} (이번 주)`}
+          />
+          <StatCard 
+            title="월간 활동" 
+            value={user_statistics.month_active} 
+            subtitle="이번 달 활동한 사용자"
+          />
+        </div>
+      </div>
+
+      {/* 게시물 통계 */}
+      <div>
+        <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px', color: colors.gray[800] }}>
+          📊 게시물 통계
+        </h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+          <StatCard 
+            title="전체 뉴스" 
+            value={post_statistics.total_news} 
+            subtitle={`오늘 +${post_statistics.news_today} / 주간 +${post_statistics.news_week}`}
+            color={colors.blue[600]}
+          />
+          <StatCard 
+            title="전체 커뮤니티" 
+            value={post_statistics.total_community} 
+            subtitle={`오늘 +${post_statistics.community_today} / 주간 +${post_statistics.community_week}`}
+            color={colors.purple[600]}
+          />
+          <StatCard 
+            title="전체 댓글" 
+            value={post_statistics.total_comments} 
+            subtitle={`오늘 +${post_statistics.comments_today}`}
+            color={colors.orange[600]}
+          />
+          <StatCard 
+            title="오늘 게시물" 
+            value={post_statistics.total_posts_today} 
+            subtitle={`뉴스 ${post_statistics.news_today} + 커뮤니티 ${post_statistics.community_today}`}
+            color={colors.green[600]}
+          />
+          <StatCard 
+            title="주간 게시물" 
+            value={post_statistics.total_posts_week} 
+            subtitle={`뉴스 ${post_statistics.news_week} + 커뮤니티 ${post_statistics.community_week}`}
+            color={colors.indigo[600]}
+          />
+        </div>
+      </div>
+
+      {/* 차트 영역 (향후 추가 가능) */}
+      <div style={{ 
+        marginTop: '32px', 
+        padding: '24px', 
+        backgroundColor: colors.gray[50], 
+        borderRadius: '12px',
+        textAlign: 'center',
+        color: colors.gray[500]
+      }}>
+        <p>📈 차트 및 그래프 기능은 추후 업데이트 예정입니다.</p>
+      </div>
+    </div>
+  );
+};
+
 // Mobile Navigation Component
 const MobileNav: React.FC<{ activeTab: string; setActiveTab: (tab: string) => void }> = ({ activeTab, setActiveTab }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
+    { id: 'statistics', label: '통계정보', icon: '📊' },
     { id: 'news', label: '뉴스 관리', icon: '' },
     { id: 'report', label: '리포트 관리', icon: '' },
     { id: 'user', label: '회원 관리', icon: '' },
@@ -5968,7 +6105,7 @@ const MobileNav: React.FC<{ activeTab: string; setActiveTab: (tab: string) => vo
 // Main Admin Component
 const AdminApp: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState('news');
+  const [activeTab, setActiveTab] = useState('statistics');
   const [hoveredNavItem, setHoveredNavItem] = useState<string | null>(null);
 
   useEffect(() => {
@@ -5994,6 +6131,8 @@ const AdminApp: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'statistics':
+        return <StatisticsManagement />;
       case 'news':
         return <NewsManagement />;
       case 'report':
@@ -6007,7 +6146,7 @@ const AdminApp: React.FC = () => {
       case 'tags':
         return <TagManagement />;
       default:
-        return <NewsManagement />;
+        return <StatisticsManagement />;
     }
   };
 
@@ -6031,6 +6170,18 @@ const AdminApp: React.FC = () => {
             </div>
             
             <nav style={styles.nav} className="desktop-only">
+              <button
+                style={{
+                  ...styles.navItem,
+                  ...(activeTab === 'statistics' ? styles.navItemActive : {}),
+                  ...(hoveredNavItem === 'statistics' && activeTab !== 'statistics' ? styles.navItemHover : {}),
+                }}
+                onClick={() => setActiveTab('statistics')}
+                onMouseEnter={() => setHoveredNavItem('statistics')}
+                onMouseLeave={() => setHoveredNavItem(null)}
+              >
+                통계정보
+              </button>
               <button
                 style={{
                   ...styles.navItem,

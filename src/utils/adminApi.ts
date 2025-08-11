@@ -463,3 +463,37 @@ export const createVoteSetting = async (data: VoteSettingData) => {
     body: JSON.stringify(data),
   });
 };
+
+// Statistics APIs
+export interface UserStatistics {
+  online_users: number;
+  today_active: number;
+  week_active: number;
+  month_active: number;
+  total_users: number;
+  new_users_today: number;
+  new_users_week: number;
+}
+
+export interface PostStatistics {
+  news_today: number;
+  community_today: number;
+  total_posts_today: number;
+  news_week: number;
+  community_week: number;
+  total_posts_week: number;
+  comments_today: number;
+  total_news: number;
+  total_community: number;
+  total_comments: number;
+}
+
+export interface SystemStatistics {
+  timestamp: string;
+  user_statistics: UserStatistics;
+  post_statistics: PostStatistics;
+}
+
+export const getSystemStatistics = async (): Promise<SystemStatistics> => {
+  return apiCall('/admin-api/dashboard/statistics');
+};
