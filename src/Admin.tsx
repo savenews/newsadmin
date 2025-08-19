@@ -2048,12 +2048,25 @@ const NewsManagement: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedTickers, setSelectedTickers] = useState<string[]>([]);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<'title' | 'created_at' | 'view_count'>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [isSaving, setIsSaving] = useState(false);
 
   const queryClient = useQueryClient();
+
+  // 검색 디바운싱 - 타이핑이 끝난 후 500ms 후에 검색 실행
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+      if (searchInput !== searchQuery) {
+        setPage(1); // 검색어가 변경되면 첫 페이지로 이동
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   // 자동 저장 기능 - 폼 데이터가 변경될 때마다 localStorage에 저장
   useEffect(() => {
@@ -2071,7 +2084,7 @@ const NewsManagement: React.FC = () => {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['news', page, searchQuery, sortField, sortOrder],
-    queryFn: () => api.getNews(searchQuery || undefined, page, 20, `${sortField}_${sortOrder}`),
+    queryFn: () => api.getNews(searchQuery && searchQuery.trim() !== '' ? searchQuery : undefined, page, 20, `${sortField}_${sortOrder}`),
   });
 
   // 정렬 핸들러
@@ -2438,22 +2451,54 @@ const NewsManagement: React.FC = () => {
       <div style={styles.pageHeader}>
         <h1 style={styles.pageTitle}>뉴스 관리</h1>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <input
-            type="text"
-            placeholder="뉴스 검색..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1); // 검색 시 첫 페이지로 이동
-            }}
-            style={{
-              padding: '10px 16px',
-              border: `1px solid ${colors.gray[300]}`,
-              borderRadius: '8px',
-              fontSize: '14px',
-              width: '250px',
-            }}
-          />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <input
+              type="text"
+              placeholder="뉴스 검색..."
+              value={searchInput}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+              }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  // Enter 키를 누르면 즉시 검색 실행
+                  setSearchQuery(searchInput);
+                  setPage(1);
+                }
+              }}
+              style={{
+                padding: '10px 40px 10px 16px',
+                border: `1px solid ${colors.gray[300]}`,
+                borderRadius: '8px',
+                fontSize: '14px',
+                width: '250px',
+              }}
+            />
+            {searchInput && (
+              <button
+                onClick={() => {
+                  setSearchInput('');
+                  setSearchQuery('');
+                  setPage(1);
+                }}
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: colors.gray[400],
+                  cursor: 'pointer',
+                  padding: '4px',
+                  fontSize: '18px',
+                  lineHeight: '1',
+                }}
+                title="검색 초기화"
+              >
+                ×
+              </button>
+            )}
+          </div>
           <button style={styles.addButton} onClick={() => openModal()}>
             <span>+</span> 뉴스 추가
           </button>
@@ -2463,10 +2508,10 @@ const NewsManagement: React.FC = () => {
       <div style={styles.tableContainer}>
         {data?.news_list?.length === 0 ? (
           <EmptyState 
-            message="아직 등록된 뉴스가 없습니다" 
-            icon="📰" 
-            actionText="첫 뉴스 작성하기"
-            onAction={() => openModal()}
+            message={searchQuery ? `"${searchQuery}"에 대한 검색 결과가 없습니다` : "아직 등록된 뉴스가 없습니다"} 
+            icon={searchQuery ? "🔍" : "📰"} 
+            actionText={searchQuery ? "검색 초기화" : "첫 뉴스 작성하기"}
+            onAction={() => searchQuery ? (setSearchInput(''), setSearchQuery('')) : openModal()}
           />
         ) : (
           <>

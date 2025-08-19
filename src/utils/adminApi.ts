@@ -81,8 +81,11 @@ export const getNews = async (search?: string, page: number = 1, pageSize: numbe
     page_size: pageSize.toString(),
     sort: sort,
   });
-  if (search) params.append('search', search);
+  if (search && search.trim() !== '') {
+    params.append('search', search.trim());
+  }
   
+  console.log('Fetching news with params:', params.toString());
   return apiCall(`/api/news/list?${params}`);
 };
 
