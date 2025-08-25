@@ -171,20 +171,57 @@ export const deleteReport = async (reportId: string) => {
 };
 
 // User APIs
-export const getUsers = async (page: number = 1, pageSize: number = 20) => {
+export interface UserStatusUpdate {
+  is_banned?: boolean;
+  role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+  ban_reason?: string;
+}
+
+export const getUserList = async (
+  page: number = 1,
+  pageSize: number = 20,
+  search?: string,
+  role?: string,
+  isBanned?: boolean,
+  sort: string = 'created_at_desc'
+) => {
   const params = new URLSearchParams({
     page: page.toString(),
     page_size: pageSize.toString(),
+    sort: sort,
   });
   
-  return apiCall(`/api/users?${params}`);
+  if (search && search.trim() !== '') {
+    params.append('search', search.trim());
+  }
+  if (role) {
+    params.append('role', role);
+  }
+  if (isBanned !== undefined) {
+    params.append('is_banned', isBanned.toString());
+  }
+  
+  return apiCall(`/admin-api/user/list?${params}`);
+};
+
+export const getUserDetail = async (userId: string) => {
+  return apiCall(`/admin-api/user/detail/${userId}`);
+};
+
+export const updateUserStatus = async (userId: string, statusData: UserStatusUpdate) => {
+  return apiCall(`/admin-api/user/status/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify(statusData),
+  });
+};
+
+// Legacy user APIs (keep for backward compatibility)
+export const getUsers = async (page: number = 1, pageSize: number = 20) => {
+  return getUserList(page, pageSize);
 };
 
 export const updateUser = async (userId: string, userData: any) => {
-  return apiCall(`/api/users/${userId}`, {
-    method: 'PUT',
-    body: JSON.stringify(userData),
-  });
+  return updateUserStatus(userId, userData);
 };
 
 export const deleteUser = async (userId: string) => {
@@ -498,4 +535,151 @@ export interface SystemStatistics {
 
 export const getSystemStatistics = async (): Promise<SystemStatistics> => {
   return apiCall('/admin-api/dashboard/statistics');
+};
+
+// Terms APIs
+export interface TermsData {
+  terms_id: string;
+  content: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export const getAllTerms = async (): Promise<TermsData[]> => {
+  return apiCall('/api/terms');
+};
+
+export const getSpecificTerms = async (termsIds: string[]): Promise<TermsData[]> => {
+  return apiCall('/api/terms/specific', {
+    method: 'POST',
+    body: JSON.stringify({ terms_ids: termsIds }),
+  });
+};
+
+export const createTerms = async (data: { terms_id: string; content: string }): Promise<TermsData> => {
+  return apiCall('/admin-api/terms', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const updateTerms = async (termsId: string, content: string): Promise<TermsData> => {
+  return apiCall(`/admin-api/terms/${termsId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ content }),
+  });
+};
+
+export const deleteTerms = async (termsId: string): Promise<string> => {
+  return apiCall(`/admin-api/terms/${termsId}`, {
+    method: 'DELETE',
+  });
+};
+
+// User Reports APIs
+export interface UserReport {
+  id: string;
+  target_type: 'NEWS_COMMENT' | 'COMMUNITY_POST' | 'COMMUNITY_COMMENT' | 'USER';
+  target_id: string;
+  target_content?: string | any[] | any;  // 신고 대상 콘텐츠 (다양한 형태 가능)
+  target_author?: string;   // 신고 대상 작성자
+  target_author_id?: string;  // 신고 대상 작성자 ID
+  target_title?: string;    // 게시글 제목 (게시글인 경우)
+  reason: 'SPAM' | 'ABUSE' | 'INAPPROPRIATE' | 'COPYRIGHT' | 'OTHER';
+  description: string;
+  reporter_id: string;
+  reporter_name?: string;
+  status: 'PENDING' | 'RESOLVED' | 'REJECTED';
+  admin_note?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface UserReportUpdate {
+  status: 'PENDING' | 'RESOLVED' | 'REJECTED';
+  admin_note?: string;
+  should_ban?: boolean;  // 차단 여부 추가
+}
+
+export const getUserReports = async (
+  page: number = 1,
+  pageSize: number = 20,
+  statusFilter?: string,
+  typeFilter?: string
+): Promise<{ reports: UserReport[]; total_count: number; page: number; page_size: number }> => {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    page_size: pageSize.toString(),
+  });
+  
+  if (statusFilter) {
+    params.append('status_filter', statusFilter);
+  }
+  if (typeFilter) {
+    params.append('type_filter', typeFilter);
+  }
+  
+  return apiCall(`/admin-api/user-reports/list?${params}`);
+};
+
+export const processUserReport = async (reportId: string, data: UserReportUpdate): Promise<string> => {
+  return apiCall(`/admin-api/user-reports/process/${reportId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+// Comments API
+export interface Comment {
+  id: string;
+  content: string;
+  author_id: string;
+  author_name: string;
+  target_id: string;
+  target_type: 'news' | 'community';
+  target_title?: string;
+  created_at: string;
+  updated_at: string;
+  is_deleted: boolean;
+  deleted_at?: string;
+  like_count: number;
+  dislike_count: number;
+}
+
+export interface CommentsResponse {
+  comments: Comment[] | string;
+  total_count: number | string;
+  page?: number;
+  page_size?: number;
+}
+
+export const getCommentsList = async (
+  page: number = 1,
+  pageSize: number = 20,
+  search?: string,
+  authorId?: string,
+  targetId?: string,
+  targetType?: 'news' | 'community',
+  isDeleted?: boolean,
+  sort: 'created_at_desc' | 'created_at_asc' = 'created_at_desc'
+): Promise<CommentsResponse> => {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    page_size: pageSize.toString(),
+    sort: sort,
+  });
+  
+  if (search) params.append('search', search);
+  if (authorId) params.append('author_id', authorId);
+  if (targetId) params.append('target_id', targetId);
+  if (targetType) params.append('target_type', targetType);
+  if (isDeleted !== undefined) params.append('is_deleted', isDeleted.toString());
+  
+  return apiCall(`/admin-api/comments/list?${params}`);
+};
+
+export const deleteComment = async (commentId: string): Promise<string> => {
+  return apiCall(`/api/comments/delete/${commentId}`, {
+    method: 'DELETE',
+  });
 };

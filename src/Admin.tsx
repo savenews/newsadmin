@@ -40,19 +40,35 @@ const colors = {
   error: '#EF4444',
   warning: '#F59E0B',
   green: {
+    100: '#D1FAE5',
     600: '#059669',
   },
   blue: {
+    50: '#EFF6FF',
+    100: '#DBEAFE',
+    200: '#BFDBFE',
+    500: '#3B82F6',
     600: '#2563EB',
+    700: '#1D4ED8',
   },
   purple: {
-    600: '#9333EA',
+    500: '#8B5CF6',
+    600: '#7C3AED',
   },
   orange: {
     600: '#EA580C',
   },
   indigo: {
     600: '#4F46E5',
+  },
+  red: {
+    50: '#FEF2F2',
+    100: '#FEE2E2',
+    200: '#FECACA',
+    300: '#FCA5A5',
+    500: '#EF4444',
+    600: '#DC2626',
+    700: '#B91C1C',
   },
   info: '#3B82F6',
 };
@@ -303,16 +319,20 @@ const styles = {
   // 액션 버튼
   actionButtons: {
     display: 'flex',
-    gap: '8px',
+    gap: '4px',
+    justifyContent: 'center',
+    flexWrap: 'nowrap' as const,
   },
   actionButton: {
-    padding: '6px 12px',
-    fontSize: '12px',
+    padding: '4px 8px',
+    fontSize: '11px',
     fontWeight: '500',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '4px',
     cursor: 'pointer',
     transition: 'all 0.2s',
+    whiteSpace: 'nowrap' as const,
+    minWidth: '40px',
   },
   editButton: {
     color: colors.white,
@@ -352,6 +372,77 @@ const styles = {
   pageButtonDisabled: {
     color: colors.gray[400],
     cursor: 'not-allowed',
+  },
+  paginationButton: {
+    padding: '8px 16px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: colors.gray[700],
+    backgroundColor: colors.white,
+    border: `1px solid ${colors.gray[300]}`,
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  paginationButtonDisabled: {
+    color: colors.gray[400],
+    backgroundColor: colors.gray[100],
+    cursor: 'not-allowed',
+  },
+  paginationInfo: {
+    fontSize: '14px',
+    color: colors.gray[600],
+    fontWeight: '500',
+  },
+  loadingMessage: {
+    textAlign: 'center' as const,
+    padding: '32px',
+    color: colors.gray[600],
+    fontSize: '14px',
+  },
+  filterSelect: {
+    padding: '10px 12px',
+    fontSize: '14px',
+    border: `1px solid ${colors.gray[300]}`,
+    borderRadius: '8px',
+    backgroundColor: colors.white,
+    cursor: 'pointer',
+    outline: 'none',
+  },
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: '12px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    overflow: 'hidden',
+  },
+  tableHeader: {
+    padding: '12px 16px',
+    textAlign: 'left' as const,
+    fontWeight: '600',
+    color: colors.gray[700],
+    backgroundColor: colors.gray[50],
+    borderBottom: `1px solid ${colors.gray[200]}`,
+    fontSize: '14px',
+  },
+  tableCell: {
+    padding: '12px 16px',
+    borderBottom: `1px solid ${colors.gray[100]}`,
+    fontSize: '14px',
+    color: colors.gray[700],
+  },
+  badge: {
+    display: 'inline-block',
+    padding: '4px 12px',
+    borderRadius: '6px',
+    fontSize: '12px',
+    fontWeight: '500',
+    whiteSpace: 'nowrap' as const,
+  },
+  noData: {
+    textAlign: 'center' as const,
+    padding: '48px',
+    color: colors.gray[500],
+    fontSize: '14px',
   },
   
   // 모달
@@ -474,6 +565,111 @@ const styles = {
   },
   desktopOnly: {
     display: 'block',
+  },
+  
+  // 검색 관련 스타일
+  searchContainer: {
+    padding: '24px',
+    backgroundColor: colors.white,
+    borderRadius: '12px',
+    marginBottom: '24px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+  },
+  searchInput: {
+    padding: '12px 16px',
+    fontSize: '14px',
+    border: `1px solid ${colors.gray[300]}`,
+    borderRadius: '8px',
+    backgroundColor: colors.white,
+    transition: 'all 0.2s',
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+  },
+  searchButton: {
+    padding: '12px 32px',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: colors.white,
+    backgroundColor: colors.primary,
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    outline: 'none',
+    whiteSpace: 'nowrap' as const,
+  },
+  
+  // 모달 관련 스타일
+  modalCloseButton: {
+    background: 'none',
+    border: 'none',
+    fontSize: '24px',
+    color: colors.gray[400],
+    cursor: 'pointer',
+    padding: '0',
+    width: '32px',
+    height: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '4px',
+    transition: 'all 0.2s',
+  },
+  
+  // 상세 정보 관련 스타일
+  detailSection: {
+    marginBottom: '24px',
+  },
+  detailSectionTitle: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: colors.gray[800],
+    marginBottom: '12px',
+  },
+  detailGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '16px',
+  },
+  detailItem: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '4px',
+  },
+  detailLabel: {
+    fontSize: '12px',
+    color: colors.gray[500],
+    fontWeight: '500',
+  },
+  detailValue: {
+    fontSize: '14px',
+    color: colors.gray[800],
+  },
+  
+  // 버튼 스타일
+  cancelButton: {
+    padding: '10px 24px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: colors.gray[700],
+    backgroundColor: colors.gray[100],
+    border: `1px solid ${colors.gray[300]}`,
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    outline: 'none',
+  },
+  submitButton: {
+    padding: '10px 24px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: colors.white,
+    backgroundColor: colors.primary,
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    outline: 'none',
   },
 };
 
@@ -2038,8 +2234,10 @@ const TickerInput: React.FC<TickerInputProps> = ({ value, onChange, placeholder 
 // News Management Component
 const NewsManagement: React.FC = () => {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNews, setEditingNews] = useState<any>(null);
+  const [commentsModalData, setCommentsModalData] = useState<{ newsId: string; title: string } | null>(null);
   const [htmlContent, setHtmlContent] = useState<string>('');
   const [formData, setFormData] = useState({
     title: '',
@@ -2083,8 +2281,8 @@ const NewsManagement: React.FC = () => {
   }, [formData, htmlContent, selectedTags, selectedTickers, isModalOpen, editingNews]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['news', page, searchQuery, sortField, sortOrder],
-    queryFn: () => api.getNews(searchQuery && searchQuery.trim() !== '' ? searchQuery : undefined, page, 20, `${sortField}_${sortOrder}`),
+    queryKey: ['news', page, pageSize, searchQuery, sortField, sortOrder],
+    queryFn: () => api.getNews(searchQuery && searchQuery.trim() !== '' ? searchQuery : undefined, page, pageSize, `${sortField}_${sortOrder}`),
   });
 
   // 정렬 핸들러
@@ -2441,7 +2639,7 @@ const NewsManagement: React.FC = () => {
     }
   };
 
-  const totalPages = Math.ceil((data?.total_count || 0) / 20);
+  const totalPages = Math.ceil((data?.total_count || 0) / pageSize);
 
   if (isLoading) return <LoadingSpinner />;
   if (error) return <div style={styles.errorContainer}>데이터를 불러오는데 실패했습니다.</div>;
@@ -2499,6 +2697,32 @@ const NewsManagement: React.FC = () => {
               </button>
             )}
           </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+            <span style={{ fontSize: '14px', color: colors.gray[600] }}>페이지당</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              style={{
+                padding: '10px 12px',
+                fontSize: '14px',
+                border: `1px solid ${colors.gray[300]}`,
+                borderRadius: '8px',
+                backgroundColor: colors.white,
+                cursor: 'pointer',
+                outline: 'none',
+              }}
+            >
+              <option value="10">10개</option>
+              <option value="20">20개</option>
+              <option value="50">50개</option>
+              <option value="100">100개</option>
+            </select>
+          </div>
+          
           <button style={styles.addButton} onClick={() => openModal()}>
             <span>+</span> 뉴스 추가
           </button>
@@ -2563,6 +2787,16 @@ const NewsManagement: React.FC = () => {
                       <td style={styles.td}>{news.comment_count}</td>
                       <td style={styles.td}>
                         <div style={styles.actionButtons}>
+                          <button
+                            style={{ 
+                              ...styles.actionButton, 
+                              backgroundColor: colors.purple[500],
+                            }}
+                            onClick={() => setCommentsModalData({ newsId: news.id, title: news.title })}
+                            title="댓글 보기"
+                          >
+                            댓글
+                          </button>
                           <button
                             style={{ 
                               ...styles.actionButton, 
@@ -2769,6 +3003,244 @@ const NewsManagement: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {commentsModalData && (
+        <NewsCommentsModal
+          newsId={commentsModalData.newsId}
+          newsTitle={commentsModalData.title}
+          onClose={() => setCommentsModalData(null)}
+        />
+      )}
+    </div>
+  );
+};
+
+// News Comments Modal Component
+const NewsCommentsModal: React.FC<{ newsId: string; newsTitle: string; onClose: () => void }> = ({ newsId, newsTitle, onClose }) => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['news-comments', newsId, page, pageSize],
+    queryFn: async () => {
+      console.log('Fetching comments for news:', newsId);
+      const result = await api.getCommentsList(page, pageSize, undefined, undefined, newsId, 'news');
+      console.log('Comments result:', result);
+      
+      // 만약 백엔드가 필터링을 제대로 하지 않는다면 프론트에서 필터링
+      if (result.comments && Array.isArray(result.comments)) {
+        const filteredComments = result.comments.filter((c: any) => c.target_id === newsId);
+        return {
+          ...result,
+          comments: filteredComments,
+          total_count: filteredComments.length
+        };
+      }
+      
+      return result;
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: api.deleteComment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['news-comments'] });
+      alert('댓글이 삭제되었습니다.');
+    },
+    onError: (error: any) => {
+      alert(`삭제 실패: ${error.message || '알 수 없는 오류가 발생했습니다.'}`);
+    },
+  });
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  return (
+    <div style={styles.modal} onClick={onClose}>
+      <div style={{ ...styles.modalContent, maxWidth: '900px' }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ ...styles.modalHeader, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <h2 style={{ ...styles.modalTitle, margin: 0 }}>뉴스 댓글</h2>
+            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: colors.gray[600] }}>{newsTitle}</p>
+          </div>
+          <button 
+            onClick={onClose} 
+            style={{ 
+              ...styles.modalCloseButton, 
+              position: 'relative', 
+              top: 'auto', 
+              right: 'auto',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+        <div style={styles.modalBody}>
+          {isLoading ? (
+            <div style={styles.loadingMessage}>댓글을 불러오는 중...</div>
+          ) : error ? (
+            <div style={styles.errorMessage}>댓글을 불러오는 중 오류가 발생했습니다.</div>
+          ) : (
+            <>
+              <div style={{ maxHeight: '500px', overflowY: 'auto', backgroundColor: colors.gray[50], borderRadius: '8px', padding: '8px' }}>
+                {data?.comments && Array.isArray(data.comments) && data.comments.length > 0 ? (
+                  data.comments.map((comment: any, index: number) => (
+                    <div key={comment.id} style={{
+                      padding: '12px',
+                      marginBottom: index < data.comments.length - 1 ? '8px' : '0',
+                      backgroundColor: comment.is_deleted ? colors.gray[100] : colors.white,
+                      borderRadius: '6px',
+                      border: `1px solid ${comment.is_deleted ? colors.gray[300] : colors.gray[200]}`,
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                            <span style={{ fontWeight: '600', fontSize: '14px', color: colors.gray[800] }}>{comment.author_name}</span>
+                            <span style={{ color: colors.gray[500], fontSize: '12px' }}>
+                              {formatDate(comment.created_at)}
+                            </span>
+                            {comment.is_deleted && (
+                              <span style={{
+                                padding: '2px 6px',
+                                backgroundColor: colors.gray[300],
+                                color: colors.gray[700],
+                                borderRadius: '3px',
+                                fontSize: '11px',
+                                fontWeight: '500',
+                              }}>
+                                삭제됨
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ color: colors.gray[700], fontSize: '14px', lineHeight: '1.5' }}>
+                        {(() => {
+                          let content = comment.content;
+                          
+                          // content가 문자열이고 JSON처럼 보이면 파싱 시도
+                          if (typeof content === 'string' && content.startsWith('[') && content.endsWith(']')) {
+                            try {
+                              const parsed = JSON.parse(content);
+                              if (Array.isArray(parsed)) {
+                                // 파싱된 배열에서 텍스트 추출
+                                return parsed.map((item: any) => {
+                                  if (typeof item === 'string') return item;
+                                  if (item.type === 'text' && item.content) return item.content;
+                                  if (item.type === 'image') return '[이미지]';
+                                  return '';
+                                }).filter(Boolean).join(' ');
+                              }
+                            } catch {
+                              // 파싱 실패시 원본 반환
+                              return content;
+                            }
+                          }
+                          
+                          // content가 이미 배열인 경우
+                          if (Array.isArray(content)) {
+                            return content.map((item: any) => {
+                              if (typeof item === 'string') return item;
+                              if (item.type === 'text' && item.content) return item.content;
+                              if (item.type === 'image') return '[이미지]';
+                              return '';
+                            }).filter(Boolean).join(' ');
+                          }
+                          
+                          // 일반 문자열인 경우
+                          if (typeof content === 'string') {
+                            return content;
+                          }
+                          
+                          // 기타 경우
+                          return JSON.stringify(content);
+                        })()}
+                          </div>
+                        </div>
+                        {!comment.is_deleted && (
+                          <button
+                            onClick={() => {
+                              if (window.confirm('이 댓글을 삭제하시겠습니까?')) {
+                                deleteMutation.mutate(comment.id);
+                              }
+                            }}
+                            style={{
+                              padding: '6px 12px',
+                              fontSize: '13px',
+                              fontWeight: '500',
+                              color: colors.gray[700],
+                              backgroundColor: colors.white,
+                              border: `1px solid ${colors.gray[300]}`,
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = colors.red[50];
+                              e.currentTarget.style.borderColor = colors.red[300];
+                              e.currentTarget.style.color = colors.red[600];
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = colors.white;
+                              e.currentTarget.style.borderColor = colors.gray[300];
+                              e.currentTarget.style.color = colors.gray[700];
+                            }}
+                          >
+                            삭제
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '32px', color: colors.gray[500] }}>
+                    댓글이 없습니다.
+                  </div>
+                )}
+              </div>
+              {data && Number(data.total_count) > 0 && (
+                <div style={{ ...styles.pagination, marginTop: '16px' }}>
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    style={{
+                      ...styles.paginationButton,
+                      ...(page === 1 ? styles.paginationButtonDisabled : {}),
+                    }}
+                  >
+                    이전
+                  </button>
+                  <span style={styles.paginationInfo}>
+                    {page} / {Math.ceil(Number(data.total_count) / pageSize)} 페이지 (총 {data.total_count}개)
+                  </span>
+                  <button
+                    onClick={() => setPage(Math.min(Math.ceil(Number(data.total_count) / pageSize), page + 1))}
+                    disabled={page >= Math.ceil(Number(data.total_count) / pageSize)}
+                    style={{
+                      ...styles.paginationButton,
+                      ...(page >= Math.ceil(Number(data.total_count) / pageSize) ? styles.paginationButtonDisabled : {}),
+                    }}
+                  >
+                    다음
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
@@ -2776,6 +3248,9 @@ const NewsManagement: React.FC = () => {
 // Report Management Component
 const ReportManagement: React.FC = () => {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
   const [htmlContent, setHtmlContent] = useState<string>('');
@@ -2804,8 +3279,8 @@ const ReportManagement: React.FC = () => {
   }, [formData, htmlContent, selectedTags, selectedTickers, isModalOpen, editingReport]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['reports', page],
-    queryFn: () => api.getReports(undefined, page),
+    queryKey: ['reports', page, pageSize, searchQuery],
+    queryFn: () => api.getReports(searchQuery || undefined, page, pageSize),
   });
 
   const { data: tagsData } = useQuery({
@@ -3050,7 +3525,7 @@ const ReportManagement: React.FC = () => {
     }
   };
 
-  const totalPages = Math.ceil((data?.total_count || 0) / 20);
+  const totalPages = Math.ceil((data?.total_count || 0) / pageSize);
 
   if (isLoading) return <LoadingSpinner />;
   if (error) return <div style={styles.errorContainer}>데이터를 불러오는데 실패했습니다.</div>;
@@ -3059,9 +3534,98 @@ const ReportManagement: React.FC = () => {
     <div>
       <div style={styles.pageHeader}>
         <h1 style={styles.pageTitle}>리포트 관리</h1>
-        <button style={styles.addButton} onClick={() => openModal()}>
-          <span>+</span> 리포트 추가
-        </button>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <input
+              type="text"
+              placeholder="리포트 검색..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  setSearchQuery(searchInput);
+                  setPage(1);
+                }
+              }}
+              style={{
+                padding: '10px 40px 10px 16px',
+                border: `1px solid ${colors.gray[300]}`,
+                borderRadius: '8px',
+                fontSize: '14px',
+                width: '250px',
+              }}
+            />
+            {searchInput && (
+              <button
+                onClick={() => {
+                  setSearchInput('');
+                  setSearchQuery('');
+                  setPage(1);
+                }}
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: colors.gray[400],
+                  cursor: 'pointer',
+                  padding: '4px',
+                  fontSize: '18px',
+                  lineHeight: '1',
+                }}
+                title="검색 초기화"
+              >
+                ×
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() => {
+              setSearchQuery(searchInput);
+              setPage(1);
+            }}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: colors.primary,
+              color: colors.white,
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+            }}
+          >
+            검색
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+            <span style={{ fontSize: '14px', color: colors.gray[600] }}>페이지당</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              style={{
+                padding: '10px 12px',
+                fontSize: '14px',
+                border: `1px solid ${colors.gray[300]}`,
+                borderRadius: '8px',
+                backgroundColor: colors.white,
+                cursor: 'pointer',
+                outline: 'none',
+              }}
+            >
+              <option value="10">10개</option>
+              <option value="20">20개</option>
+              <option value="50">50개</option>
+              <option value="100">100개</option>
+            </select>
+          </div>
+          <button style={styles.addButton} onClick={() => openModal()}>
+            <span>+</span> 리포트 추가
+          </button>
+        </div>
       </div>
       
       <div style={styles.tableContainer}>
@@ -3343,34 +3907,107 @@ const ReportManagement: React.FC = () => {
 // User Management Component
 const UserManagement: React.FC = () => {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
+  const [bannedFilter, setBannedFilter] = useState<boolean | undefined>(undefined);
+  const [sortBy, setSortBy] = useState('created_at_desc');
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-  const [showComingSoonModal, setShowComingSoonModal] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [statusFormData, setStatusFormData] = useState<api.UserStatusUpdate>({
+    is_banned: false,
+    role: 'USER',
+    ban_reason: '',
+  });
 
   const queryClient = useQueryClient();
 
+  // 회원 목록 조회
   const { data, isLoading, error } = useQuery({
-    queryKey: ['users', page],
-    queryFn: () => api.getUsers(page),
-    enabled: false, // API가 준비될 때까지 비활성화
+    queryKey: ['users', page, pageSize, searchQuery, roleFilter, bannedFilter, sortBy],
+    queryFn: () => api.getUserList(page, pageSize, searchQuery, roleFilter, bannedFilter, sortBy),
+    staleTime: 30000,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: api.deleteUser,
+  // 회원 상세 조회
+  const { data: userDetail, isLoading: isLoadingDetail } = useQuery({
+    queryKey: ['userDetail', selectedUser?.id],
+    queryFn: () => api.getUserDetail(selectedUser?.id),
+    enabled: !!selectedUser?.id && showDetailModal,
+  });
+
+  // 회원 상태 업데이트
+  const statusMutation = useMutation({
+    mutationFn: ({ userId, data }: { userId: string; data: api.UserStatusUpdate }) => 
+      api.updateUserStatus(userId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['userDetail'] });
+      setShowStatusModal(false);
+      setSelectedUser(null);
+      alert('회원 상태가 업데이트되었습니다.');
     },
     onError: (error: any) => {
-      alert(error.message || '회원 삭제에 실패했습니다.');
+      alert(error.message || '회원 상태 업데이트에 실패했습니다.');
     },
   });
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('정말 삭제하시겠습니까?')) {
-      deleteMutation.mutate(id);
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchQuery(searchInput);
+    setPage(1);
+  };
+
+  const handleViewDetail = (user: any) => {
+    setSelectedUser(user);
+    setShowDetailModal(true);
+  };
+
+  const handleEditStatus = (user: any) => {
+    setSelectedUser(user);
+    setStatusFormData({
+      is_banned: user.is_banned || false,
+      role: user.role || 'USER',
+      ban_reason: '',
+    });
+    setShowStatusModal(true);
+  };
+
+  const handleStatusSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedUser) {
+      statusMutation.mutate({ userId: selectedUser.id, data: statusFormData });
     }
   };
 
-  const totalPages = Math.ceil((data?.total_count || 0) / 20);
+  const totalPages = Math.ceil((data?.total_count || 0) / pageSize);
+
+  // Role 배지 색상
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return { bg: colors.purple[600] + '20', color: colors.purple[600] };
+      case 'ADMIN':
+        return { bg: colors.blue[600] + '20', color: colors.blue[600] };
+      default:
+        return { bg: colors.gray[200], color: colors.gray[600] };
+    }
+  };
+
+  // Role 한글 변환
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return '최고관리자';
+      case 'ADMIN':
+        return '관리자';
+      default:
+        return '일반회원';
+    }
+  };
 
   if (isLoading) return <LoadingSpinner />;
   if (error) return <div style={styles.errorContainer}>데이터를 불러오는데 실패했습니다.</div>;
@@ -3381,69 +4018,148 @@ const UserManagement: React.FC = () => {
         <h1 style={styles.pageTitle}>회원 관리</h1>
       </div>
 
-      {/* Coming Soon Modal */}
-      {showComingSoonModal && (
-        <div style={styles.modal} onClick={() => setShowComingSoonModal(false)}>
-          <div 
+      {/* 검색 및 필터 영역 */}
+      <div style={styles.searchContainer}>
+        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'stretch' }}>
+          <input
+            type="text"
+            placeholder="이름 또는 이메일로 검색"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                setSearchQuery(searchInput);
+                setPage(1);
+              }
+            }}
             style={{
-              ...styles.modalContent,
-              maxWidth: '500px',
-              textAlign: 'center',
-            }} 
-            onClick={(e) => e.stopPropagation()}
+              ...styles.searchInput,
+              flex: '1 1 auto',
+              minWidth: '200px',
+            }}
+          />
+          
+          <select
+            value={roleFilter}
+            onChange={(e) => {
+              setRoleFilter(e.target.value);
+              setPage(1);
+            }}
+            style={{
+              padding: '12px 16px',
+              fontSize: '14px',
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '8px',
+              backgroundColor: colors.white,
+              cursor: 'pointer',
+              outline: 'none',
+              minWidth: '140px',
+              width: 'auto',
+            }}
           >
-            <div style={{ padding: '40px 20px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '20px' }}>🚧</div>
-              <h2 style={{ 
-                fontSize: '24px', 
-                fontWeight: '600', 
-                color: colors.gray[800],
-                marginBottom: '16px' 
-              }}>
-                기능 준비중
-              </h2>
-              <p style={{ 
-                fontSize: '16px', 
-                color: colors.gray[600],
-                lineHeight: '1.6',
-                marginBottom: '32px'
-              }}>
-                회원 관리 기능은 현재 준비중입니다.<br />
-                빠른 시일 내에 서비스를 제공할 예정입니다.
-              </p>
-              <button
-                onClick={() => setShowComingSoonModal(false)}
-                style={{
-                  padding: '12px 32px',
-                  backgroundColor: colors.primary,
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                }}
-              >
-                확인
-              </button>
-            </div>
+            <option value="">전체 역할</option>
+            <option value="USER">일반회원</option>
+            <option value="ADMIN">관리자</option>
+            <option value="SUPER_ADMIN">최고관리자</option>
+          </select>
+
+          <select
+            value={bannedFilter === undefined ? '' : bannedFilter.toString()}
+            onChange={(e) => {
+              setBannedFilter(e.target.value === '' ? undefined : e.target.value === 'true');
+              setPage(1);
+            }}
+            style={{
+              padding: '12px 16px',
+              fontSize: '14px',
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '8px',
+              backgroundColor: colors.white,
+              cursor: 'pointer',
+              outline: 'none',
+              minWidth: '120px',
+              width: 'auto',
+            }}
+          >
+            <option value="">전체 상태</option>
+            <option value="false">정상</option>
+            <option value="true">차단됨</option>
+          </select>
+
+          <select
+            value={sortBy}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              setPage(1);
+            }}
+            style={{
+              padding: '12px 16px',
+              fontSize: '14px',
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '8px',
+              backgroundColor: colors.white,
+              cursor: 'pointer',
+              outline: 'none',
+              minWidth: '170px',
+              width: 'auto',
+            }}
+          >
+            <option value="created_at_desc">가입일 최신순</option>
+            <option value="created_at_asc">가입일 오래된순</option>
+            <option value="last_login_desc">최근 로그인순</option>
+            <option value="points_desc">포인트 높은순</option>
+          </select>
+
+          <button type="submit" style={styles.searchButton}>
+            검색
+          </button>
+
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '14px', color: colors.gray[600] }}>페이지당</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              style={{
+                padding: '12px 16px',
+                fontSize: '14px',
+                border: `1px solid ${colors.gray[300]}`,
+                borderRadius: '8px',
+                backgroundColor: colors.white,
+                cursor: 'pointer',
+                outline: 'none',
+                width: 'auto',
+              }}
+            >
+              <option value="10">10개</option>
+              <option value="20">20개</option>
+              <option value="50">50개</option>
+              <option value="100">100개</option>
+            </select>
           </div>
-        </div>
-      )}
-      
+        </form>
+      </div>
+
+      {/* 회원 목록 테이블 */}
       <div style={styles.tableContainer}>
         {data?.users?.length === 0 ? (
-          <EmptyState message="등록된 회원이 없습니다." icon="" />
+          <EmptyState message="검색 결과가 없습니다." icon="" />
         ) : (
           <>
             <div style={styles.tableWrapper}>
               <table style={styles.table}>
                 <thead>
                   <tr>
+                    <th style={styles.th}>ID</th>
                     <th style={styles.th}>이름</th>
                     <th style={styles.th}>이메일</th>
-                    <th style={styles.th}>가입일</th>
+                    <th style={styles.th}>역할</th>
                     <th style={styles.th}>상태</th>
+                    <th style={styles.th}>포인트</th>
+                    <th style={styles.th}>가입일</th>
+                    <th style={styles.th}>최근 로그인</th>
                     <th style={styles.th}>액션</th>
                   </tr>
                 </thead>
@@ -3458,27 +4174,69 @@ const UserManagement: React.FC = () => {
                       onMouseEnter={() => setHoveredRow(user.id)}
                       onMouseLeave={() => setHoveredRow(null)}
                     >
-                      <td style={styles.td}>{user.name}</td>
+                      <td style={styles.td}>{user.id}</td>
+                      <td style={styles.td}>{user.username || user.name}</td>
                       <td style={styles.td}>{user.email}</td>
-                      <td style={styles.td}>{new Date(user.created_at).toLocaleDateString()}</td>
                       <td style={styles.td}>
                         <span style={{
-                          padding: '4px 8px',
-                          borderRadius: '4px',
+                          padding: '4px 10px',
+                          borderRadius: '6px',
                           fontSize: '12px',
-                          backgroundColor: user.is_active ? colors.success + '20' : colors.error + '20',
-                          color: user.is_active ? colors.success : colors.error,
+                          backgroundColor: getRoleColor(user.role).bg,
+                          color: getRoleColor(user.role).color,
+                          fontWeight: '600',
+                          display: 'inline-block',
                         }}>
-                          {user.is_active ? '활성' : '비활성'}
+                          {getRoleLabel(user.role)}
                         </span>
                       </td>
                       <td style={styles.td}>
-                        <button
-                          style={{ ...styles.actionButton, ...styles.deleteButton }}
-                          onClick={() => handleDelete(user.id)}
-                        >
-                          삭제
-                        </button>
+                        <span style={{
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          backgroundColor: user.is_banned ? colors.error + '20' : colors.success + '20',
+                          color: user.is_banned ? colors.error : colors.success,
+                          fontWeight: '500',
+                          display: 'inline-block',
+                        }}>
+                          {user.is_banned ? '차단됨' : '정상'}
+                        </span>
+                      </td>
+                      <td style={styles.td}>{user.points?.toLocaleString() || 0}</td>
+                      <td style={styles.td}>
+                        {new Date(user.created_at).toLocaleDateString('ko-KR')}
+                      </td>
+                      <td style={styles.td}>
+                        {user.last_login_at ? 
+                          new Date(user.last_login_at).toLocaleDateString('ko-KR') : 
+                          '-'
+                        }
+                      </td>
+                      <td style={styles.td}>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                          <button
+                            style={{
+                              ...styles.actionButton,
+                              padding: '6px 12px',
+                              fontSize: '13px',
+                            }}
+                            onClick={() => handleViewDetail(user)}
+                          >
+                            상세
+                          </button>
+                          <button
+                            style={{
+                              ...styles.actionButton,
+                              ...styles.editButton,
+                              padding: '6px 12px',
+                              fontSize: '13px',
+                            }}
+                            onClick={() => handleEditStatus(user)}
+                          >
+                            상태변경
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -3494,6 +4252,230 @@ const UserManagement: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* 회원 상세 모달 */}
+      {showDetailModal && selectedUser && (
+        <div style={styles.modal} onClick={() => setShowDetailModal(false)}>
+          <div 
+            style={{
+              ...styles.modalContent,
+              maxWidth: '600px',
+            }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={styles.modalHeader}>
+              <h2 style={styles.modalTitle}>회원 상세 정보</h2>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                style={styles.modalCloseButton}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div style={styles.modalBody}>
+              {isLoadingDetail ? (
+                <div style={{ padding: '40px', textAlign: 'center' }}>
+                  <LoadingSpinner />
+                </div>
+              ) : userDetail?.user_info ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div style={styles.detailSection}>
+                    <h3 style={styles.detailSectionTitle}>기본 정보</h3>
+                    <div style={styles.detailGrid}>
+                      <div style={styles.detailItem}>
+                        <span style={styles.detailLabel}>ID</span>
+                        <span style={styles.detailValue}>{userDetail.user_info.id}</span>
+                      </div>
+                      <div style={styles.detailItem}>
+                        <span style={styles.detailLabel}>이름</span>
+                        <span style={styles.detailValue}>{userDetail.user_info.username || userDetail.user_info.name}</span>
+                      </div>
+                      <div style={styles.detailItem}>
+                        <span style={styles.detailLabel}>이메일</span>
+                        <span style={styles.detailValue}>{userDetail.user_info.email}</span>
+                      </div>
+                      <div style={styles.detailItem}>
+                        <span style={styles.detailLabel}>역할</span>
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          backgroundColor: getRoleColor(userDetail.user_info.role).bg,
+                          color: getRoleColor(userDetail.user_info.role).color,
+                          fontWeight: '500',
+                        }}>
+                          {getRoleLabel(userDetail.user_info.role)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={styles.detailSection}>
+                    <h3 style={styles.detailSectionTitle}>활동 정보</h3>
+                    <div style={styles.detailGrid}>
+                      <div style={styles.detailItem}>
+                        <span style={styles.detailLabel}>포인트</span>
+                        <span style={styles.detailValue}>{userDetail.user_info.points?.toLocaleString() || 0}</span>
+                      </div>
+                      <div style={styles.detailItem}>
+                        <span style={styles.detailLabel}>가입일</span>
+                        <span style={styles.detailValue}>
+                          {new Date(userDetail.user_info.created_at).toLocaleString('ko-KR')}
+                        </span>
+                      </div>
+                      <div style={styles.detailItem}>
+                        <span style={styles.detailLabel}>최근 로그인</span>
+                        <span style={styles.detailValue}>
+                          {userDetail.user_info.last_login_at ? 
+                            new Date(userDetail.user_info.last_login_at).toLocaleString('ko-KR') : 
+                            '없음'
+                          }
+                        </span>
+                      </div>
+                      <div style={styles.detailItem}>
+                        <span style={styles.detailLabel}>상태</span>
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          backgroundColor: userDetail.user_info.is_banned ? colors.error + '20' : colors.success + '20',
+                          color: userDetail.user_info.is_banned ? colors.error : colors.success,
+                        }}>
+                          {userDetail.user_info.is_banned ? '차단됨' : '정상'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {userDetail.user_info.is_banned && userDetail.user_info.ban_reason && (
+                    <div style={styles.detailSection}>
+                      <h3 style={styles.detailSectionTitle}>차단 정보</h3>
+                      <div style={{
+                        padding: '12px',
+                        backgroundColor: colors.error + '10',
+                        borderRadius: '8px',
+                        border: `1px solid ${colors.error}30`,
+                      }}>
+                        <p style={{ margin: 0, color: colors.gray[700] }}>
+                          {userDetail.user_info.ban_reason}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ padding: '40px', textAlign: 'center', color: colors.gray[500] }}>
+                  사용자 정보를 불러올 수 없습니다.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 회원 상태 변경 모달 */}
+      {showStatusModal && selectedUser && (
+        <div style={styles.modal} onClick={() => setShowStatusModal(false)}>
+          <div 
+            style={{
+              ...styles.modalContent,
+              maxWidth: '500px',
+            }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <form onSubmit={handleStatusSubmit}>
+              <div style={styles.modalHeader}>
+                <h2 style={styles.modalTitle}>회원 상태 변경</h2>
+                <button
+                  type="button"
+                  onClick={() => setShowStatusModal(false)}
+                  style={styles.modalCloseButton}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div style={styles.modalBody}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>회원 정보</label>
+                  <div style={{
+                    padding: '12px',
+                    backgroundColor: colors.gray[50],
+                    borderRadius: '8px',
+                    marginBottom: '20px',
+                  }}>
+                    <p style={{ margin: '0 0 8px 0' }}>
+                      <strong>이름:</strong> {selectedUser.username || selectedUser.name}
+                    </p>
+                    <p style={{ margin: 0 }}>
+                      <strong>이메일:</strong> {selectedUser.email}
+                    </p>
+                  </div>
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>역할</label>
+                  <select
+                    value={statusFormData.role}
+                    onChange={(e) => setStatusFormData({ ...statusFormData, role: e.target.value as any })}
+                    style={styles.select}
+                  >
+                    <option value="USER">일반회원</option>
+                    <option value="ADMIN">관리자</option>
+                    <option value="SUPER_ADMIN">최고관리자</option>
+                  </select>
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>
+                    <input
+                      type="checkbox"
+                      checked={statusFormData.is_banned}
+                      onChange={(e) => setStatusFormData({ ...statusFormData, is_banned: e.target.checked })}
+                      style={{ marginRight: '8px' }}
+                    />
+                    계정 차단
+                  </label>
+                </div>
+
+                {statusFormData.is_banned && (
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>차단 사유</label>
+                    <textarea
+                      value={statusFormData.ban_reason}
+                      onChange={(e) => setStatusFormData({ ...statusFormData, ban_reason: e.target.value })}
+                      placeholder="차단 사유를 입력하세요"
+                      style={{
+                        ...styles.textarea,
+                        minHeight: '100px',
+                      }}
+                      required
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <div style={styles.modalFooter}>
+                <button
+                  type="button"
+                  onClick={() => setShowStatusModal(false)}
+                  style={styles.cancelButton}
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  style={styles.submitButton}
+                  disabled={statusMutation.isPending}
+                >
+                  {statusMutation.isPending ? '처리 중...' : '변경하기'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -3512,6 +4494,7 @@ const CalendarManagement: React.FC = () => {
   const [selectedTime, setSelectedTime] = useState('09:00');
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('event_date_desc');
   const [filterDateStart, setFilterDateStart] = useState('');
@@ -4172,15 +5155,38 @@ const CalendarManagement: React.FC = () => {
           alignItems: window.innerWidth < 768 ? 'stretch' : 'flex-end',
         }}>
           {/* Search Input */}
-          <div style={{ flex: '1 1 300px', minWidth: window.innerWidth < 768 ? '100%' : '200px' }}>
-            <label style={{ ...styles.label, marginBottom: '8px', display: 'block' }}>검색</label>
-            <input
-              type="text"
-              placeholder="제목, 내용, 작성자로 검색..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={styles.input}
-            />
+          <div style={{ flex: '1 1 300px', minWidth: window.innerWidth < 768 ? '100%' : '200px', display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+            <div style={{ flex: '1' }}>
+              <label style={{ ...styles.label, marginBottom: '8px', display: 'block' }}>검색</label>
+              <input
+                type="text"
+                placeholder="제목으로 검색..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    setSearchQuery(searchInput);
+                  }
+                }}
+                style={styles.input}
+              />
+            </div>
+            <button
+              onClick={() => setSearchQuery(searchInput)}
+              style={{
+                padding: '12px 20px',
+                backgroundColor: colors.primary,
+                color: colors.white,
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                height: 'fit-content',
+              }}
+            >
+              검색
+            </button>
           </div>
 
           {/* Date Range Filter */}
@@ -4356,6 +5362,28 @@ const CalendarManagement: React.FC = () => {
                 다음 달
               </button>
             </div>
+            
+            {/* 초기화 버튼 */}
+            <button
+              onClick={() => {
+                setSearchInput('');
+                setSearchQuery('');
+                setFilterDateStart('');
+                setFilterDateEnd('');
+                setSortBy('event_date_desc');
+              }}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: colors.gray[200],
+                color: colors.gray[700],
+                border: `1px solid ${colors.gray[300]}`,
+                borderRadius: '4px',
+                fontSize: '13px',
+                cursor: 'pointer',
+              }}
+            >
+              필터 초기화
+            </button>
           </div>
         </div>
       </div>
@@ -4845,8 +5873,10 @@ const CalendarManagement: React.FC = () => {
 // Community Management Component
 const CommunityManagement: React.FC = () => {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<any>(null);
+  const [commentsModalData, setCommentsModalData] = useState<{ postId: string; title: string } | null>(null);
   const [htmlContent, setHtmlContent] = useState<string>('');
   const [formData, setFormData] = useState({
     title: '',
@@ -4854,7 +5884,8 @@ const CommunityManagement: React.FC = () => {
     linked_news_id: '',
   });
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchInput, setSearchInput] = useState(''); // 검색 입력값
+  const [searchQuery, setSearchQuery] = useState(''); // 실제 검색 쿼리
   const [selectedCategory, setSelectedCategory] = useState('');
 
   const queryClient = useQueryClient();
@@ -4872,8 +5903,8 @@ const CommunityManagement: React.FC = () => {
   }, [formData, htmlContent, isModalOpen, editingPost]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['community', page, searchTerm, selectedCategory],
-    queryFn: () => api.getCommunityPosts(page, 20, searchTerm, selectedCategory),
+    queryKey: ['community', page, pageSize, searchQuery, selectedCategory],
+    queryFn: () => api.getCommunityPosts(page, pageSize, searchQuery || undefined, selectedCategory || undefined),
   });
 
   const createMutation = useMutation({
@@ -4881,7 +5912,7 @@ const CommunityManagement: React.FC = () => {
     onSuccess: async () => {
       // 모든 community 관련 쿼리 무효화 및 새로고침
       await queryClient.invalidateQueries({ queryKey: ['community'] });
-      await queryClient.refetchQueries({ queryKey: ['community', page, searchTerm, selectedCategory] });
+      await queryClient.refetchQueries({ queryKey: ['community', page, searchQuery, selectedCategory] });
       alert('게시글이 성공적으로 등록되었습니다.');
       localStorage.removeItem('communityFormDraft'); // 성공 시 임시 저장 삭제
       closeModal();
@@ -4903,7 +5934,7 @@ const CommunityManagement: React.FC = () => {
     onSuccess: async () => {
       // 모든 community 관련 쿼리 무효화 및 새로고침
       await queryClient.invalidateQueries({ queryKey: ['community'] });
-      await queryClient.refetchQueries({ queryKey: ['community', page, searchTerm, selectedCategory] });
+      await queryClient.refetchQueries({ queryKey: ['community', page, searchQuery, selectedCategory] });
       alert('게시글이 성공적으로 수정되었습니다.');
       localStorage.removeItem('communityFormDraft'); // 성공 시 임시 저장 삭제
       closeModal();
@@ -4924,7 +5955,7 @@ const CommunityManagement: React.FC = () => {
     onSuccess: async () => {
       // 모든 community 관련 쿼리 무효화 및 새로고침
       await queryClient.invalidateQueries({ queryKey: ['community'] });
-      await queryClient.refetchQueries({ queryKey: ['community', page, searchTerm, selectedCategory] });
+      await queryClient.refetchQueries({ queryKey: ['community', page, searchQuery, selectedCategory] });
       alert('게시글이 성공적으로 삭제되었습니다.');
     },
     onError: (error: any) => {
@@ -5063,7 +6094,7 @@ const CommunityManagement: React.FC = () => {
     }
   };
 
-  const totalPages = Math.ceil((data?.total_count || 0) / 20);
+  const totalPages = Math.ceil((data?.total_count || 0) / pageSize);
 
   if (isLoading) return <LoadingSpinner />;
   if (error) return <div style={styles.errorContainer}>데이터를 불러오는데 실패했습니다.</div>;
@@ -5072,43 +6103,110 @@ const CommunityManagement: React.FC = () => {
     <div>
       <div style={styles.pageHeader}>
         <h1 style={styles.pageTitle}>커뮤니티 관리</h1>
-        <button style={styles.addButton} onClick={() => openModal()}>
-          <span>+</span> 게시글 작성
-        </button>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+            <span style={{ fontSize: '14px', color: colors.gray[600] }}>페이지당</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              style={{
+                padding: '10px 12px',
+                fontSize: '14px',
+                border: `1px solid ${colors.gray[300]}`,
+                borderRadius: '8px',
+                backgroundColor: colors.white,
+                cursor: 'pointer',
+                outline: 'none',
+              }}
+            >
+              <option value="10">10개</option>
+              <option value="20">20개</option>
+              <option value="50">50개</option>
+              <option value="100">100개</option>
+            </select>
+          </div>
+          <button style={styles.addButton} onClick={() => openModal()}>
+            <span>+</span> 게시글 작성
+          </button>
+        </div>
       </div>
 
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
         <input
           type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              setSearchQuery(searchInput);
+              setPage(1);
+            }
+          }}
           placeholder="검색어 입력"
-          style={{ ...styles.input, width: '300px' }}
+          style={{ 
+            ...styles.input, 
+            width: '250px',
+            padding: '10px 12px',
+            fontSize: '14px',
+            border: `1px solid ${colors.gray[300]}`,
+            borderRadius: '8px',
+          }}
         />
         <select
           value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          style={{ ...styles.input, width: '200px' }}
+          onChange={(e) => {
+            setSelectedCategory(e.target.value);
+            setPage(1);
+          }}
+          style={{ 
+            ...styles.input, 
+            width: '180px',
+            padding: '10px 12px',
+            fontSize: '14px',
+            border: `1px solid ${colors.gray[300]}`,
+            borderRadius: '8px',
+            cursor: 'pointer',
+          }}
         >
-          <option value="">모든 카테고리</option>
-          <option value="discussion">토론</option>
-          <option value="question">질문</option>
-          <option value="analysis">분석</option>
-          <option value="news">뉴스</option>
-          <option value="etc">기타</option>
+          <option value="">모든 게시판</option>
+          <option value="free_board">자유게시판</option>
+          <option value="news_discussion">뉴스토론</option>
         </select>
         <button
           onClick={() => {
-            setSearchTerm('');
+            setSearchQuery(searchInput);
+            setPage(1);
+          }}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: colors.primary,
+            color: colors.white,
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer',
+          }}
+        >
+          검색
+        </button>
+        <button
+          onClick={() => {
+            setSearchInput('');
+            setSearchQuery('');
             setSelectedCategory('');
             setPage(1);
           }}
           style={{
-            padding: '8px 16px',
-            backgroundColor: colors.gray[300],
+            padding: '10px 20px',
+            backgroundColor: colors.gray[200],
             color: colors.gray[700],
-            border: 'none',
-            borderRadius: '4px',
+            border: `1px solid ${colors.gray[300]}`,
+            borderRadius: '8px',
+            fontSize: '14px',
             cursor: 'pointer',
           }}
         >
@@ -5153,26 +6251,21 @@ const CommunityManagement: React.FC = () => {
                       <td style={styles.td}>{post.author_name}</td>
                       <td style={styles.td}>
                         <span style={{
-                          padding: '4px 8px',
-                          borderRadius: '4px',
+                          padding: '4px 10px',
+                          borderRadius: '6px',
                           fontSize: '12px',
+                          fontWeight: '500',
                           backgroundColor: 
-                            post.category === 'discussion' ? '#E0E7FF' :
-                            post.category === 'question' ? '#FEF3C7' :
-                            post.category === 'analysis' ? '#D1FAE5' :
-                            post.category === 'news' ? '#FEE2E2' :
+                            post.category === 'free_board' ? '#E0E7FF' :
+                            post.category === 'news_discussion' ? '#FEE2E2' :
                             '#F3F4F6',
                           color: 
-                            post.category === 'discussion' ? '#6366F1' :
-                            post.category === 'question' ? '#F59E0B' :
-                            post.category === 'analysis' ? '#10B981' :
-                            post.category === 'news' ? '#EF4444' :
+                            post.category === 'free_board' ? '#6366F1' :
+                            post.category === 'news_discussion' ? '#EF4444' :
                             '#6B7280',
                         }}>
-                          {post.category === 'discussion' ? '토론' :
-                           post.category === 'question' ? '질문' :
-                           post.category === 'analysis' ? '분석' :
-                           post.category === 'news' ? '뉴스' :
+                          {post.category === 'free_board' ? '자유게시판' :
+                           post.category === 'news_discussion' ? '뉴스토론' :
                            post.category || '기타'}
                         </span>
                       </td>
@@ -5181,6 +6274,15 @@ const CommunityManagement: React.FC = () => {
                       <td style={styles.td}>{post.comment_count}</td>
                       <td style={styles.td}>
                         <div style={styles.actionButtons}>
+                          <button
+                            style={{ 
+                              ...styles.actionButton, 
+                              backgroundColor: colors.purple[500],
+                            }}
+                            onClick={() => setCommentsModalData({ postId: post.id, title: post.title })}
+                          >
+                            댓글
+                          </button>
                           <button
                             style={{ ...styles.actionButton, ...styles.editButton }}
                             onClick={() => openModal(post)}
@@ -5362,6 +6464,244 @@ const CommunityManagement: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {commentsModalData && (
+        <CommunityCommentsModal
+          postId={commentsModalData.postId}
+          postTitle={commentsModalData.title}
+          onClose={() => setCommentsModalData(null)}
+        />
+      )}
+    </div>
+  );
+};
+
+// Community Comments Modal Component
+const CommunityCommentsModal: React.FC<{ postId: string; postTitle: string; onClose: () => void }> = ({ postId, postTitle, onClose }) => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['community-comments', postId, page, pageSize],
+    queryFn: async () => {
+      console.log('Fetching comments for community post:', postId);
+      const result = await api.getCommentsList(page, pageSize, undefined, undefined, postId, 'community');
+      console.log('Community comments result:', result);
+      
+      // 만약 백엔드가 필터링을 제대로 하지 않는다면 프론트에서 필터링
+      if (result.comments && Array.isArray(result.comments)) {
+        const filteredComments = result.comments.filter((c: any) => c.target_id === postId);
+        return {
+          ...result,
+          comments: filteredComments,
+          total_count: filteredComments.length
+        };
+      }
+      
+      return result;
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: api.deleteComment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['community-comments'] });
+      alert('댓글이 삭제되었습니다.');
+    },
+    onError: (error: any) => {
+      alert(`삭제 실패: ${error.message || '알 수 없는 오류가 발생했습니다.'}`);
+    },
+  });
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  return (
+    <div style={styles.modal} onClick={onClose}>
+      <div style={{ ...styles.modalContent, maxWidth: '900px' }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ ...styles.modalHeader, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <h2 style={{ ...styles.modalTitle, margin: 0 }}>커뮤니티 댓글</h2>
+            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: colors.gray[600] }}>{postTitle}</p>
+          </div>
+          <button 
+            onClick={onClose} 
+            style={{ 
+              ...styles.modalCloseButton, 
+              position: 'relative', 
+              top: 'auto', 
+              right: 'auto',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+        <div style={styles.modalBody}>
+          {isLoading ? (
+            <div style={styles.loadingMessage}>댓글을 불러오는 중...</div>
+          ) : error ? (
+            <div style={styles.errorMessage}>댓글을 불러오는 중 오류가 발생했습니다.</div>
+          ) : (
+            <>
+              <div style={{ maxHeight: '500px', overflowY: 'auto', backgroundColor: colors.gray[50], borderRadius: '8px', padding: '8px' }}>
+                {data?.comments && Array.isArray(data.comments) && data.comments.length > 0 ? (
+                  data.comments.map((comment: any, index: number) => (
+                    <div key={comment.id} style={{
+                      padding: '12px',
+                      marginBottom: index < data.comments.length - 1 ? '8px' : '0',
+                      backgroundColor: comment.is_deleted ? colors.gray[100] : colors.white,
+                      borderRadius: '6px',
+                      border: `1px solid ${comment.is_deleted ? colors.gray[300] : colors.gray[200]}`,
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                            <span style={{ fontWeight: '600', fontSize: '14px', color: colors.gray[800] }}>{comment.author_name}</span>
+                            <span style={{ color: colors.gray[500], fontSize: '12px' }}>
+                              {formatDate(comment.created_at)}
+                            </span>
+                            {comment.is_deleted && (
+                              <span style={{
+                                padding: '2px 6px',
+                                backgroundColor: colors.gray[300],
+                                color: colors.gray[700],
+                                borderRadius: '3px',
+                                fontSize: '11px',
+                                fontWeight: '500',
+                              }}>
+                                삭제됨
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ color: colors.gray[700], fontSize: '14px', lineHeight: '1.5' }}>
+                        {(() => {
+                          let content = comment.content;
+                          
+                          // content가 문자열이고 JSON처럼 보이면 파싱 시도
+                          if (typeof content === 'string' && content.startsWith('[') && content.endsWith(']')) {
+                            try {
+                              const parsed = JSON.parse(content);
+                              if (Array.isArray(parsed)) {
+                                // 파싱된 배열에서 텍스트 추출
+                                return parsed.map((item: any) => {
+                                  if (typeof item === 'string') return item;
+                                  if (item.type === 'text' && item.content) return item.content;
+                                  if (item.type === 'image') return '[이미지]';
+                                  return '';
+                                }).filter(Boolean).join(' ');
+                              }
+                            } catch {
+                              // 파싱 실패시 원본 반환
+                              return content;
+                            }
+                          }
+                          
+                          // content가 이미 배열인 경우
+                          if (Array.isArray(content)) {
+                            return content.map((item: any) => {
+                              if (typeof item === 'string') return item;
+                              if (item.type === 'text' && item.content) return item.content;
+                              if (item.type === 'image') return '[이미지]';
+                              return '';
+                            }).filter(Boolean).join(' ');
+                          }
+                          
+                          // 일반 문자열인 경우
+                          if (typeof content === 'string') {
+                            return content;
+                          }
+                          
+                          // 기타 경우
+                          return JSON.stringify(content);
+                        })()}
+                          </div>
+                        </div>
+                        {!comment.is_deleted && (
+                          <button
+                            onClick={() => {
+                              if (window.confirm('이 댓글을 삭제하시겠습니까?')) {
+                                deleteMutation.mutate(comment.id);
+                              }
+                            }}
+                            style={{
+                              padding: '6px 12px',
+                              fontSize: '13px',
+                              fontWeight: '500',
+                              color: colors.gray[700],
+                              backgroundColor: colors.white,
+                              border: `1px solid ${colors.gray[300]}`,
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = colors.red[50];
+                              e.currentTarget.style.borderColor = colors.red[300];
+                              e.currentTarget.style.color = colors.red[600];
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = colors.white;
+                              e.currentTarget.style.borderColor = colors.gray[300];
+                              e.currentTarget.style.color = colors.gray[700];
+                            }}
+                          >
+                            삭제
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '32px', color: colors.gray[500] }}>
+                    댓글이 없습니다.
+                  </div>
+                )}
+              </div>
+              {data && Number(data.total_count) > 0 && (
+                <div style={{ ...styles.pagination, marginTop: '16px' }}>
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    style={{
+                      ...styles.paginationButton,
+                      ...(page === 1 ? styles.paginationButtonDisabled : {}),
+                    }}
+                  >
+                    이전
+                  </button>
+                  <span style={styles.paginationInfo}>
+                    {page} / {Math.ceil(Number(data.total_count) / pageSize)} 페이지 (총 {data.total_count}개)
+                  </span>
+                  <button
+                    onClick={() => setPage(Math.min(Math.ceil(Number(data.total_count) / pageSize), page + 1))}
+                    disabled={page >= Math.ceil(Number(data.total_count) / pageSize)}
+                    style={{
+                      ...styles.paginationButton,
+                      ...(page >= Math.ceil(Number(data.total_count) / pageSize) ? styles.paginationButtonDisabled : {}),
+                    }}
+                  >
+                    다음
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
@@ -6141,17 +7481,22 @@ const StatisticsManagement: React.FC = () => {
 };
 
 // Mobile Navigation Component
-const MobileNav: React.FC<{ activeTab: string; setActiveTab: (tab: string) => void }> = ({ activeTab, setActiveTab }) => {
+type TabType = 'statistics' | 'news' | 'report' | 'user' | 'calendar' | 'community' | 'tags' | 'terms' | 'reports' | 'comments';
+
+const MobileNav: React.FC<{ activeTab: TabType; setActiveTab: (tab: TabType) => void }> = ({ activeTab, setActiveTab }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { id: 'statistics', label: '통계', icon: '' },
-    { id: 'news', label: '뉴스 관리', icon: '' },
-    { id: 'report', label: '리포트 관리', icon: '' },
-    { id: 'user', label: '회원 관리', icon: '' },
-    { id: 'calendar', label: '캘린더 관리', icon: '' },
-    { id: 'community', label: '커뮤니티 관리', icon: '' },
-    { id: 'tags', label: '태그 관리', icon: '' },
+    { id: 'statistics' as TabType, label: '통계', icon: '' },
+    { id: 'news' as TabType, label: '뉴스 관리', icon: '' },
+    { id: 'report' as TabType, label: '리포트 관리', icon: '' },
+    { id: 'user' as TabType, label: '회원 관리', icon: '' },
+    { id: 'calendar' as TabType, label: '캘린더 관리', icon: '' },
+    { id: 'community' as TabType, label: '커뮤니티 관리', icon: '' },
+    { id: 'comments' as TabType, label: '댓글 관리', icon: '' },
+    { id: 'tags' as TabType, label: '태그 관리', icon: '' },
+    { id: 'terms' as TabType, label: '약관 설정', icon: '' },
+    { id: 'reports' as TabType, label: '신고 관리', icon: '' },
   ];
 
   const hamburgerStyle = {
@@ -6255,10 +7600,1383 @@ const MobileNav: React.FC<{ activeTab: string; setActiveTab: (tab: string) => vo
   );
 };
 
+// User Reports Management Component
+const UserReportsManagement: React.FC = () => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [selectedReport, setSelectedReport] = useState<api.UserReport | null>(null);
+  const [showProcessModal, setShowProcessModal] = useState(false);
+  const [processFormData, setProcessFormData] = useState<api.UserReportUpdate>({
+    status: 'PENDING',
+    admin_note: '',
+    should_ban: false,
+  });
+  const [banReason, setBanReason] = useState('');
+
+  const queryClient = useQueryClient();
+
+  // 신고 목록 조회
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['userReports', page, pageSize, statusFilter, typeFilter],
+    queryFn: () => api.getUserReports(page, pageSize, statusFilter || undefined, typeFilter || undefined),
+  });
+
+  // 신고 처리
+  const processMutation = useMutation({
+    mutationFn: async ({ reportId, data }: { reportId: string; data: api.UserReportUpdate }) => {
+      // 먼저 신고 처리
+      const result = await api.processUserReport(reportId, data);
+      
+      // 차단 처리가 필요한 경우
+      if (data.should_ban && selectedReport?.target_author_id) {
+        await api.updateUserStatus(selectedReport.target_author_id, {
+          is_banned: true,
+          ban_reason: banReason || `신고 처리: ${selectedReport.reason} - ${selectedReport.description}`,
+        });
+      }
+      
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userReports'] });
+      alert('신고가 성공적으로 처리되었습니다.');
+      closeProcessModal();
+    },
+    onError: (error: any) => {
+      alert(error.message || '신고 처리에 실패했습니다.');
+    },
+  });
+
+  const openProcessModal = (report: api.UserReport) => {
+    setSelectedReport(report);
+    setProcessFormData({
+      status: report.status === 'PENDING' ? 'PENDING' : report.status,
+      admin_note: report.admin_note || '',
+      should_ban: false,
+    });
+    setShowProcessModal(true);
+  };
+
+  const closeProcessModal = () => {
+    setShowProcessModal(false);
+    setSelectedReport(null);
+    setProcessFormData({
+      status: 'PENDING',
+      admin_note: '',
+      should_ban: false,
+    });
+    setBanReason('');
+  };
+
+  const handleProcessSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedReport) {
+      processMutation.mutate({ reportId: selectedReport.id, data: processFormData });
+    }
+  };
+
+  // 신고 유형 한글 변환
+  const getTargetTypeLabel = (type: string) => {
+    const labels: { [key: string]: string } = {
+      'NEWS_COMMENT': '뉴스 댓글',
+      'COMMUNITY_POST': '커뮤니티 게시글',
+      'COMMUNITY_COMMENT': '커뮤니티 댓글',
+      'USER': '사용자',
+    };
+    return labels[type] || type;
+  };
+
+  // 신고 사유 한글 변환
+  const getReasonLabel = (reason: string) => {
+    const labels: { [key: string]: string } = {
+      'SPAM': '스팸',
+      'ABUSE': '욕설/비방',
+      'INAPPROPRIATE': '부적절한 내용',
+      'COPYRIGHT': '저작권 침해',
+      'OTHER': '기타',
+    };
+    return labels[reason] || reason;
+  };
+
+  // 상태 한글 변환
+  const getStatusLabel = (status: string) => {
+    const labels: { [key: string]: string } = {
+      'PENDING': '대기중',
+      'REVIEWED': '검토됨',
+      'RESOLVED': '처리완료',
+      'REJECTED': '반려',
+    };
+    return labels[status] || status;
+  };
+
+  // 상태별 색상
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return { bg: colors.warning + '20', color: colors.warning };
+      case 'REVIEWED':
+        return { bg: colors.info + '20', color: colors.info };
+      case 'RESOLVED':
+        return { bg: colors.success + '20', color: colors.success };
+      case 'REJECTED':
+        return { bg: colors.error + '20', color: colors.error };
+      default:
+        return { bg: colors.gray[200], color: colors.gray[600] };
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const totalPages = Math.ceil((data?.total_count || 0) / pageSize);
+
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <div style={styles.errorContainer}>데이터를 불러오는데 실패했습니다.</div>;
+
+  return (
+    <div>
+      <div style={styles.pageHeader}>
+        <h1 style={styles.pageTitle}>신고 관리</h1>
+      </div>
+
+      {/* 필터 영역 */}
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <select
+          value={statusFilter}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            setPage(1);
+          }}
+          style={{
+            padding: '10px 12px',
+            fontSize: '14px',
+            border: `1px solid ${colors.gray[300]}`,
+            borderRadius: '8px',
+            backgroundColor: colors.white,
+            cursor: 'pointer',
+            outline: 'none',
+            minWidth: '140px',
+          }}
+        >
+          <option value="">전체 상태</option>
+          <option value="PENDING">대기중</option>
+          <option value="RESOLVED">처리완료</option>
+          <option value="REJECTED">반려</option>
+        </select>
+
+        <select
+          value={typeFilter}
+          onChange={(e) => {
+            setTypeFilter(e.target.value);
+            setPage(1);
+          }}
+          style={{
+            padding: '10px 12px',
+            fontSize: '14px',
+            border: `1px solid ${colors.gray[300]}`,
+            borderRadius: '8px',
+            backgroundColor: colors.white,
+            cursor: 'pointer',
+            outline: 'none',
+            minWidth: '160px',
+          }}
+        >
+          <option value="">전체 유형</option>
+          <option value="NEWS_COMMENT">뉴스 댓글</option>
+          <option value="COMMUNITY_POST">커뮤니티 게시글</option>
+          <option value="COMMUNITY_COMMENT">커뮤니티 댓글</option>
+          <option value="USER">사용자</option>
+        </select>
+
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '14px', color: colors.gray[600] }}>페이지당</span>
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
+            style={{
+              padding: '10px 12px',
+              fontSize: '14px',
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '8px',
+              backgroundColor: colors.white,
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            <option value="10">10개</option>
+            <option value="20">20개</option>
+            <option value="50">50개</option>
+            <option value="100">100개</option>
+          </select>
+        </div>
+      </div>
+
+      <div style={styles.tableContainer}>
+        {!data?.reports || data.reports.length === 0 ? (
+          <EmptyState message="신고 내역이 없습니다." icon="🚨" />
+        ) : (
+          <>
+            <div style={styles.tableWrapper}>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={styles.th}>신고일시</th>
+                    <th style={styles.th}>대상 유형</th>
+                    <th style={styles.th}>신고 사유</th>
+                    <th style={styles.th}>설명</th>
+                    <th style={styles.th}>신고자</th>
+                    <th style={styles.th}>상태</th>
+                    <th style={styles.th}>액션</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.reports.map((report: api.UserReport) => (
+                    <tr
+                      key={report.id}
+                      style={{
+                        ...styles.tableRow,
+                        ...(hoveredRow === report.id ? styles.tableRowHover : {}),
+                      }}
+                      onMouseEnter={() => setHoveredRow(report.id)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                    >
+                      <td style={styles.td}>
+                        {new Date(report.created_at).toLocaleString('ko-KR')}
+                      </td>
+                      <td style={styles.td}>
+                        <div>
+                          <span style={{
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            backgroundColor: colors.gray[100],
+                            color: colors.gray[700],
+                          }}>
+                            {getTargetTypeLabel(report.target_type)}
+                          </span>
+                          {report.target_title && (
+                            <div style={{ fontSize: '11px', color: colors.gray[500], marginTop: '4px' }}>
+                              {report.target_title.substring(0, 30)}...
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td style={styles.td}>
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          backgroundColor: colors.orange[600] + '20',
+                          color: colors.orange[600],
+                          fontWeight: '500',
+                        }}>
+                          {getReasonLabel(report.reason)}
+                        </span>
+                      </td>
+                      <td style={styles.td}>
+                        <div style={{
+                          maxWidth: '200px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          fontSize: '13px',
+                        }}>
+                          {report.description}
+                        </div>
+                      </td>
+                      <td style={styles.td}>{report.reporter_name || 'Unknown'}</td>
+                      <td style={styles.td}>
+                        <span style={{
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          backgroundColor: getStatusColor(report.status).bg,
+                          color: getStatusColor(report.status).color,
+                        }}>
+                          {getStatusLabel(report.status)}
+                        </span>
+                      </td>
+                      <td style={styles.td}>
+                        <button
+                          style={styles.actionButton}
+                          onClick={() => openProcessModal(report)}
+                        >
+                          처리
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            <Pagination 
+              currentPage={page} 
+              totalPages={totalPages} 
+              onPageChange={setPage} 
+            />
+          </>
+        )}
+      </div>
+
+      {/* 신고 처리 모달 */}
+      {showProcessModal && selectedReport && (
+        <div style={styles.modal} onClick={closeProcessModal}>
+          <div 
+            style={{
+              ...styles.modalContent,
+              maxWidth: '600px',
+            }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ ...styles.modalHeader, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ ...styles.modalTitle, margin: 0 }}>신고 처리</h2>
+              <button
+                onClick={closeProcessModal}
+                style={{ ...styles.modalCloseButton, position: 'relative', top: 'auto', right: 'auto' }}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <form onSubmit={handleProcessSubmit}>
+              <div style={styles.modalBody}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>신고 정보</label>
+                  <div style={{
+                    padding: '16px',
+                    backgroundColor: colors.gray[50],
+                    border: `1px solid ${colors.gray[200]}`,
+                    borderRadius: '8px',
+                    marginBottom: '16px',
+                  }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '12px' }}>
+                      <div style={{ fontWeight: '600', color: colors.gray[600] }}>신고 대상:</div>
+                      <div>{getTargetTypeLabel(selectedReport.target_type)} (ID: {selectedReport.target_id})</div>
+                      
+                      <div style={{ fontWeight: '600', color: colors.gray[600] }}>신고 사유:</div>
+                      <div>
+                        <span style={{
+                          padding: '2px 8px',
+                          backgroundColor: colors.red[100],
+                          color: colors.red[700],
+                          borderRadius: '4px',
+                          fontSize: '13px',
+                          fontWeight: '600',
+                        }}>
+                          {getReasonLabel(selectedReport.reason)}
+                        </span>
+                      </div>
+                      
+                      <div style={{ fontWeight: '600', color: colors.gray[600] }}>상세 설명:</div>
+                      <div>{selectedReport.description}</div>
+                      
+                      <div style={{ fontWeight: '600', color: colors.gray[600] }}>신고자:</div>
+                      <div>{selectedReport.reporter_name || 'Unknown'} ({selectedReport.reporter_id})</div>
+                      
+                      <div style={{ fontWeight: '600', color: colors.gray[600] }}>신고 일시:</div>
+                      <div>{formatDate(selectedReport.created_at)}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 신고 대상 콘텐츠 표시 */}
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>신고된 콘텐츠</label>
+                  <div style={{
+                    padding: '16px',
+                    backgroundColor: colors.white,
+                    border: `1px solid ${colors.gray[300]}`,
+                    borderRadius: '8px',
+                    marginBottom: '16px',
+                  }}>
+                    {selectedReport.target_author && (
+                      <div style={{ marginBottom: '12px' }}>
+                        <strong style={{ color: colors.gray[700] }}>작성자:</strong> {selectedReport.target_author}
+                      </div>
+                    )}
+                    {selectedReport.target_title && (
+                      <div style={{ marginBottom: '12px' }}>
+                        <strong style={{ color: colors.gray[700] }}>제목:</strong> {selectedReport.target_title}
+                      </div>
+                    )}
+                    <div style={{
+                      padding: '12px',
+                      backgroundColor: colors.gray[50],
+                      borderRadius: '6px',
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                    }}>
+                      <strong style={{ color: colors.gray[700] }}>내용:</strong>
+                      <div style={{ marginTop: '8px', whiteSpace: 'pre-wrap' }}>
+                        {(() => {
+                          if (!selectedReport.target_content) {
+                            return '콘텐츠를 불러올 수 없습니다.';
+                          }
+                          if (typeof selectedReport.target_content === 'string') {
+                            return selectedReport.target_content;
+                          }
+                          if (Array.isArray(selectedReport.target_content)) {
+                            // content가 배열인 경우 (뉴스/리포트 content 형식)
+                            return selectedReport.target_content.map((item: any) => {
+                              if (typeof item === 'string') return item;
+                              if (item.type === 'text') return item.content;
+                              if (item.type === 'image') return `[이미지: ${item.alt || item.url}]`;
+                              return JSON.stringify(item);
+                            }).join('\n');
+                          }
+                          return JSON.stringify(selectedReport.target_content);
+                        })()}
+                      </div>
+                    </div>
+                    <div style={{ 
+                      marginTop: '12px', 
+                      display: 'flex', 
+                      gap: '12px',
+                      paddingTop: '12px',
+                      borderTop: `1px solid ${colors.gray[200]}`,
+                    }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // 원본 게시글/댓글로 이동 (새 탭)
+                          if (selectedReport.target_type === 'NEWS_COMMENT') {
+                            window.open(`https://www.saveticker.com/news/${selectedReport.target_id}`, '_blank');
+                          } else if (selectedReport.target_type === 'COMMUNITY_POST' || selectedReport.target_type === 'COMMUNITY_COMMENT') {
+                            window.open(`https://www.saveticker.com/community/${selectedReport.target_id}`, '_blank');
+                          }
+                        }}
+                        style={{
+                          padding: '8px 16px',
+                          fontSize: '14px',
+                          color: colors.blue[600],
+                          backgroundColor: colors.blue[50],
+                          border: `1px solid ${colors.blue[200]}`,
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        원본 보기
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>처리 상태 *</label>
+                  <div style={{ display: 'flex', gap: '12px', marginBottom: '8px' }}>
+                    {['PENDING', 'RESOLVED', 'REJECTED'].map((status) => (
+                      <button
+                        key={status}
+                        type="button"
+                        onClick={() => setProcessFormData({ ...processFormData, status: status as any })}
+                        style={{
+                          flex: 1,
+                          padding: '10px',
+                          border: `1px solid ${processFormData.status === status ? colors.blue[500] : colors.gray[300]}`,
+                          backgroundColor: processFormData.status === status ? colors.blue[50] : colors.white,
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        <div style={{ fontSize: '14px', fontWeight: processFormData.status === status ? '600' : '400' }}>
+                          {getStatusLabel(status)}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>관리자 메모</label>
+                  <textarea
+                    value={processFormData.admin_note}
+                    onChange={(e) => setProcessFormData({ ...processFormData, admin_note: e.target.value })}
+                    placeholder="처리 내용이나 메모를 입력하세요 (예: 경고 조치, 콘텐츠 삭제 등)"
+                    style={{
+                      ...styles.textarea,
+                      minHeight: '100px',
+                    }}
+                  />
+                </div>
+
+                {processFormData.status === 'RESOLVED' && selectedReport?.target_author_id && (
+                  <div style={{
+                    padding: '16px',
+                    backgroundColor: colors.gray[50],
+                    border: `1px solid ${colors.gray[300]}`,
+                    borderRadius: '8px',
+                    marginTop: '16px',
+                  }}>
+                    <div style={styles.formGroup}>
+                      <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: 0 }}>
+                        <input
+                          type="checkbox"
+                          checked={processFormData.should_ban || false}
+                          onChange={(e) => {
+                            setProcessFormData({ ...processFormData, should_ban: e.target.checked });
+                            if (!e.target.checked) setBanReason('');
+                          }}
+                          style={{ width: '18px', height: '18px' }}
+                        />
+                        <span style={{ fontWeight: '500' }}>사용자 차단 처리</span>
+                      </label>
+                      <div style={{ fontSize: '13px', color: colors.gray[600], marginTop: '8px', marginLeft: '26px' }}>
+                        <div>대상 사용자: <strong>{selectedReport.target_author || 'Unknown'}</strong> ({selectedReport.target_author_id})</div>
+                        <div style={{ marginTop: '4px', fontSize: '12px', color: colors.red[600], fontWeight: '600' }}>
+                          주의: 한번 차단 처리하면 되돌릴 수 없습니다.
+                        </div>
+                        <div style={{ marginTop: '2px', fontSize: '12px', color: colors.gray[500] }}>
+                          선택 시 해당 사용자의 계정이 즉시 차단됩니다.
+                        </div>
+                      </div>
+                      
+                      {processFormData.should_ban && (
+                        <div style={{ marginTop: '12px', marginLeft: '26px' }}>
+                          <label style={{ fontSize: '13px', fontWeight: '600', color: colors.gray[700] }}>차단 사유:</label>
+                          <textarea
+                            value={banReason}
+                            onChange={(e) => setBanReason(e.target.value)}
+                            placeholder="차단 사유를 입력하세요 (선택사항)"
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              marginTop: '6px',
+                              border: `1px solid ${colors.gray[300]}`,
+                              borderRadius: '6px',
+                              fontSize: '13px',
+                              minHeight: '60px',
+                              resize: 'vertical',
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div style={styles.modalFooter}>
+                <button
+                  type="button"
+                  onClick={closeProcessModal}
+                  style={styles.cancelButton}
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  style={styles.submitButton}
+                  disabled={processMutation.isPending}
+                >
+                  {processMutation.isPending ? '처리 중...' : '처리하기'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Terms Management Component
+const TermsManagement: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTerms, setEditingTerms] = useState<api.TermsData | null>(null);
+  const [formData, setFormData] = useState({
+    terms_id: '',
+    content: '',
+  });
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+
+  const queryClient = useQueryClient();
+
+  // 약관 목록 조회
+  const { data: termsData, isLoading, error } = useQuery({
+    queryKey: ['terms'],
+    queryFn: api.getAllTerms,
+  });
+
+  // 약관 수정
+  const updateMutation = useMutation({
+    mutationFn: ({ termsId, content }: { termsId: string; content: string }) =>
+      api.updateTerms(termsId, content),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['terms'] });
+      alert('약관이 성공적으로 수정되었습니다.');
+      closeModal();
+    },
+    onError: (error: any) => {
+      alert(error.message || '약관 수정에 실패했습니다.');
+    },
+  });
+
+
+  const openModal = (terms: api.TermsData) => {
+    setEditingTerms(terms);
+    setFormData({
+      terms_id: terms.terms_id,
+      content: terms.content,
+    });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingTerms(null);
+    setFormData({
+      terms_id: '',
+      content: '',
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingTerms) {
+      updateMutation.mutate({ termsId: editingTerms.terms_id, content: formData.content });
+    }
+  };
+
+  // 약관 ID에 따른 한글 이름 반환
+  const getTermsLabel = (termsId: string) => {
+    const labels: { [key: string]: string } = {
+      'service': '서비스 이용약관',
+      'privacy': '개인정보 처리방침',
+      'marketing': '마케팅 정보 수신 동의',
+    };
+    return labels[termsId] || termsId;
+  };
+
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <div style={styles.errorContainer}>데이터를 불러오는데 실패했습니다.</div>;
+
+  return (
+    <div>
+      <div style={styles.pageHeader}>
+        <h1 style={styles.pageTitle}>약관 설정</h1>
+      </div>
+
+      <div style={styles.tableContainer}>
+        {!termsData || termsData.length === 0 ? (
+          <EmptyState message="등록된 약관이 없습니다." icon="📄" />
+        ) : (
+          <div style={styles.tableWrapper}>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.th}>약관 ID</th>
+                  <th style={styles.th}>약관명</th>
+                  <th style={styles.th}>내용 미리보기</th>
+                  <th style={styles.th}>생성일</th>
+                  <th style={styles.th}>수정일</th>
+                  <th style={styles.th}>액션</th>
+                </tr>
+              </thead>
+              <tbody>
+                {termsData.map((terms: api.TermsData) => (
+                  <tr
+                    key={terms.terms_id}
+                    style={{
+                      ...styles.tableRow,
+                      ...(hoveredRow === terms.terms_id ? styles.tableRowHover : {}),
+                    }}
+                    onMouseEnter={() => setHoveredRow(terms.terms_id)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                  >
+                    <td style={styles.td}>
+                      <span style={{
+                        fontFamily: 'monospace',
+                        backgroundColor: colors.gray[100],
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontSize: '13px',
+                      }}>
+                        {terms.terms_id}
+                      </span>
+                    </td>
+                    <td style={styles.td}>
+                      <span style={{ fontWeight: '500' }}>
+                        {getTermsLabel(terms.terms_id)}
+                      </span>
+                    </td>
+                    <td style={styles.td}>
+                      <div style={{
+                        maxWidth: '300px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        color: colors.gray[600],
+                        fontSize: '13px',
+                      }}>
+                        {terms.content.replace(/<[^>]*>/g, '').substring(0, 100)}...
+                      </div>
+                    </td>
+                    <td style={styles.td}>
+                      {terms.created_at ? new Date(terms.created_at).toLocaleDateString('ko-KR') : '-'}
+                    </td>
+                    <td style={styles.td}>
+                      {terms.updated_at ? new Date(terms.updated_at).toLocaleDateString('ko-KR') : '-'}
+                    </td>
+                    <td style={styles.td}>
+                      <button
+                        style={styles.actionButton}
+                        onClick={() => openModal(terms)}
+                      >
+                        수정
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* 약관 수정 모달 */}
+      {isModalOpen && editingTerms && (
+        <div style={styles.modal} onClick={closeModal}>
+          <div 
+            style={{
+              ...styles.modalContent,
+              maxWidth: '800px',
+              maxHeight: '90vh',
+              overflow: 'auto',
+            }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ ...styles.modalHeader, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ ...styles.modalTitle, margin: 0 }}>
+                약관 수정 - {getTermsLabel(editingTerms.terms_id)}
+              </h2>
+              <button
+                onClick={closeModal}
+                style={{ 
+                  ...styles.modalCloseButton, 
+                  position: 'relative', 
+                  top: 'auto', 
+                  right: 'auto',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit}>
+              <div style={styles.modalBody}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>약관 내용 *</label>
+                  <textarea
+                    value={formData.content}
+                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                    placeholder="약관 내용을 입력하세요."
+                    style={{
+                      ...styles.textarea,
+                      minHeight: '500px',
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                    }}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div style={styles.modalFooter}>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  style={styles.cancelButton}
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  style={styles.submitButton}
+                  disabled={updateMutation.isPending}
+                >
+                  {updateMutation.isPending ? '처리 중...' : '수정하기'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Comments Management Component
+const CommentsManagement: React.FC = () => {
+  const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [targetTypeFilter, setTargetTypeFilter] = useState<'all' | 'news' | 'community'>('all');
+  const [deletedFilter, setDeletedFilter] = useState<'all' | 'deleted' | 'active'>('all');
+  const [sortBy, setSortBy] = useState<'created_at_desc' | 'created_at_asc'>('created_at_desc');
+  const [selectedComment, setSelectedComment] = useState<any>(null);
+
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['comments', page, pageSize, searchQuery, targetTypeFilter, deletedFilter, sortBy],
+    queryFn: async () => {
+      const response = await api.getCommentsList(
+        page, 
+        pageSize, 
+        searchQuery || undefined,
+        undefined,
+        undefined,
+        targetTypeFilter !== 'all' ? targetTypeFilter : undefined,
+        deletedFilter === 'deleted' ? true : deletedFilter === 'active' ? false : undefined,
+        sortBy
+      );
+      
+      // API 응답 정규화
+      if (typeof response.comments === 'string') {
+        try {
+          return {
+            ...response,
+            comments: JSON.parse(response.comments as string),
+            total_count: typeof response.total_count === 'string' ? parseInt(response.total_count) : response.total_count
+          };
+        } catch {
+          return {
+            ...response,
+            comments: [],
+            total_count: 0
+          };
+        }
+      }
+      
+      return {
+        ...response,
+        total_count: typeof response.total_count === 'string' ? parseInt(response.total_count) : response.total_count
+      };
+    },
+    enabled: true,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: api.deleteComment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['comments'] });
+      alert('댓글이 삭제되었습니다.');
+      setSelectedComment(null);
+    },
+    onError: (error: any) => {
+      alert(`삭제 실패: ${error.message || '알 수 없는 오류가 발생했습니다.'}`);
+    },
+  });
+
+  const handleSearch = () => {
+    setSearchQuery(searchInput);
+    setPage(1);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const truncateText = (text: string, maxLength: number = 100) => {
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
+  if (error) {
+    return (
+      <div style={styles.errorMessage}>
+        댓글 목록을 불러오는 중 오류가 발생했습니다.
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={styles.pageHeader}>
+        <h1 style={styles.pageTitle}>댓글 관리</h1>
+      </div>
+
+      <div style={{ 
+        display: 'flex', 
+        flexWrap: 'wrap', 
+        gap: '12px', 
+        marginBottom: '20px',
+        padding: '16px',
+        backgroundColor: colors.white,
+        borderRadius: '8px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+      }}>
+        <div style={{ display: 'flex', gap: '8px', flex: '1 1 auto', minWidth: '300px' }}>
+          <input
+            type="text"
+            placeholder="댓글 내용 검색..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            style={{
+              flex: 1,
+              padding: '10px 12px',
+              fontSize: '14px',
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '6px',
+              outline: 'none',
+            }}
+          />
+          <button 
+            onClick={handleSearch} 
+            style={{
+              padding: '10px 20px',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: colors.white,
+              backgroundColor: colors.primary,
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap' as const,
+            }}
+          >
+            검색
+          </button>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <select
+            value={targetTypeFilter}
+            onChange={(e) => {
+              setTargetTypeFilter(e.target.value as 'all' | 'news' | 'community');
+              setPage(1);
+            }}
+            style={{
+              padding: '10px 12px',
+              fontSize: '14px',
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '6px',
+              backgroundColor: colors.white,
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            <option value="all">모든 타입</option>
+            <option value="news">뉴스</option>
+            <option value="community">커뮤니티</option>
+          </select>
+          <select
+            value={deletedFilter}
+            onChange={(e) => {
+              setDeletedFilter(e.target.value as 'all' | 'deleted' | 'active');
+              setPage(1);
+            }}
+            style={{
+              padding: '10px 12px',
+              fontSize: '14px',
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '6px',
+              backgroundColor: colors.white,
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            <option value="all">모든 상태</option>
+            <option value="active">활성</option>
+            <option value="deleted">삭제됨</option>
+          </select>
+          <select
+            value={sortBy}
+            onChange={(e) => {
+              setSortBy(e.target.value as 'created_at_desc' | 'created_at_asc');
+              setPage(1);
+            }}
+            style={{
+              padding: '10px 12px',
+              fontSize: '14px',
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '6px',
+              backgroundColor: colors.white,
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            <option value="created_at_desc">최신순</option>
+            <option value="created_at_asc">오래된순</option>
+          </select>
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
+            style={{
+              padding: '10px 12px',
+              fontSize: '14px',
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '6px',
+              backgroundColor: colors.white,
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            <option value="10">10개씩</option>
+            <option value="20">20개씩</option>
+            <option value="50">50개씩</option>
+            <option value="100">100개씩</option>
+          </select>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div style={styles.loadingMessage}>댓글을 불러오는 중...</div>
+      ) : (
+        <>
+          <div style={styles.card}>
+            <div style={styles.tableContainer}>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={{ ...styles.tableHeader, width: '100px' }}>타입</th>
+                    <th style={{ ...styles.tableHeader, width: '200px' }}>대상</th>
+                    <th style={{ ...styles.tableHeader, width: '150px' }}>작성자</th>
+                    <th style={{ ...styles.tableHeader, minWidth: '300px' }}>내용</th>
+                    <th style={{ ...styles.tableHeader, width: '150px' }}>작성일</th>
+                    <th style={{ ...styles.tableHeader, width: '80px' }}>상태</th>
+                    <th style={{ ...styles.tableHeader, width: '120px' }}>액션</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data && Array.isArray(data.comments) && data.comments.map((comment: any) => (
+                    <tr key={comment.id} style={comment.is_deleted ? { ...styles.tableRow, opacity: 0.6 } : styles.tableRow}>
+                      <td style={styles.tableCell}>
+                        <span style={{
+                          ...styles.badge,
+                          backgroundColor: comment.target_type === 'news' ? colors.blue[100] : colors.green[100],
+                          color: comment.target_type === 'news' ? colors.blue[600] : colors.green[600],
+                        }}>
+                          {comment.target_type === 'news' ? '뉴스' : '커뮤니티'}
+                        </span>
+                      </td>
+                      <td style={styles.tableCell}>
+                        <div style={{ fontSize: '12px', color: colors.gray[600] }}>
+                          {truncateText(comment.target_title || comment.target_id, 30)}
+                        </div>
+                      </td>
+                      <td style={styles.tableCell}>
+                        <div>
+                          <div style={{ fontWeight: '500' }}>{comment.author_name}</div>
+                          <div style={{ fontSize: '12px', color: colors.gray[500] }}>{comment.author_id}</div>
+                        </div>
+                      </td>
+                      <td style={styles.tableCell}>
+                        <div style={{ maxWidth: '300px' }}>
+                          {(() => {
+                            let content = comment.content;
+                            
+                            // content가 문자열이고 JSON처럼 보이면 파싱 시도
+                            if (typeof content === 'string' && content.startsWith('[') && content.endsWith(']')) {
+                              try {
+                                const parsed = JSON.parse(content);
+                                if (Array.isArray(parsed)) {
+                                  // 파싱된 배열에서 텍스트 추출
+                                  const text = parsed.map((item: any) => {
+                                    if (typeof item === 'string') return item;
+                                    if (item.type === 'text' && item.content) return item.content;
+                                    if (item.type === 'image') return '[이미지]';
+                                    return '';
+                                  }).filter(Boolean).join(' ');
+                                  return truncateText(text, 100);
+                                }
+                              } catch {
+                                // 파싱 실패시 원본 사용
+                                return truncateText(content, 100);
+                              }
+                            }
+                            
+                            // 일반 문자열인 경우
+                            if (typeof content === 'string') {
+                              return truncateText(content, 100);
+                            }
+                            
+                            // 배열인 경우
+                            if (Array.isArray(content)) {
+                              const text = content.map((item: any) => {
+                                if (typeof item === 'string') return item;
+                                if (item.type === 'text' && item.content) return item.content;
+                                if (item.type === 'image') return '[이미지]';
+                                return '';
+                              }).filter(Boolean).join(' ');
+                              return truncateText(text, 100);
+                            }
+                            
+                            return '';
+                          })()}
+                        </div>
+                      </td>
+                      <td style={styles.tableCell}>
+                        {formatDate(comment.created_at)}
+                      </td>
+                      <td style={styles.tableCell}>
+                        {comment.is_deleted ? (
+                          <span style={{ ...styles.badge, backgroundColor: colors.red[100], color: colors.red[600] }}>
+                            삭제됨
+                          </span>
+                        ) : (
+                          <span style={{ ...styles.badge, backgroundColor: colors.green[100], color: colors.green[600] }}>
+                            활성
+                          </span>
+                        )}
+                      </td>
+                      <td style={styles.tableCell}>
+                        <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                          <button
+                            onClick={() => setSelectedComment(comment)}
+                            style={{ 
+                              padding: '4px 10px',
+                              fontSize: '11px',
+                              fontWeight: '500',
+                              color: colors.white,
+                              backgroundColor: colors.blue[500],
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap' as const,
+                            }}
+                          >
+                            상세
+                          </button>
+                          {!comment.is_deleted && (
+                            <button
+                              onClick={() => {
+                                if (window.confirm('이 댓글을 삭제하시겠습니까?')) {
+                                  deleteMutation.mutate(comment.id);
+                                }
+                              }}
+                              style={{ 
+                                padding: '4px 10px',
+                                fontSize: '11px',
+                                fontWeight: '500',
+                                color: colors.white,
+                                backgroundColor: colors.red[500],
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap' as const,
+                              }}
+                            >
+                              삭제
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {(!data?.comments || !Array.isArray(data.comments) || data.comments.length === 0) && (
+                <div style={styles.noData}>댓글이 없습니다.</div>
+              )}
+            </div>
+          </div>
+
+          {data && Number(data.total_count) > 0 && (
+            <div style={styles.pagination}>
+              <button
+                onClick={() => setPage(Math.max(1, page - 1))}
+                disabled={page === 1}
+                style={{
+                  ...styles.paginationButton,
+                  ...(page === 1 ? styles.paginationButtonDisabled : {}),
+                }}
+              >
+                이전
+              </button>
+              <span style={styles.paginationInfo}>
+                {page} / {Math.ceil(Number(data.total_count) / pageSize)} 페이지 (총 {data.total_count}개)
+              </span>
+              <button
+                onClick={() => setPage(Math.min(Math.ceil(Number(data.total_count) / pageSize), page + 1))}
+                disabled={page >= Math.ceil(Number(data.total_count) / pageSize)}
+                style={{
+                  ...styles.paginationButton,
+                  ...(page >= Math.ceil(Number(data.total_count) / pageSize) ? styles.paginationButtonDisabled : {}),
+                }}
+              >
+                다음
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {selectedComment && (
+        <div style={styles.modal} onClick={() => setSelectedComment(null)}>
+          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div style={{ ...styles.modalHeader, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ ...styles.modalTitle, margin: 0 }}>댓글 상세</h2>
+              <button
+                onClick={() => setSelectedComment(null)}
+                style={{ ...styles.modalCloseButton, position: 'relative', top: 'auto', right: 'auto' }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={styles.modalBody}>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '100px 1fr', 
+                gap: '12px',
+                padding: '16px',
+                backgroundColor: colors.gray[50],
+                borderRadius: '8px',
+                marginBottom: '16px'
+              }}>
+                <div style={{ fontWeight: '600', color: colors.gray[600] }}>타입</div>
+                <div>
+                  <span style={{
+                    padding: '2px 8px',
+                    backgroundColor: selectedComment.target_type === 'news' ? colors.blue[100] : colors.green[100],
+                    color: selectedComment.target_type === 'news' ? colors.blue[600] : colors.green[600],
+                    borderRadius: '4px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                  }}>
+                    {selectedComment.target_type === 'news' ? '뉴스' : '커뮤니티'}
+                  </span>
+                </div>
+                
+                <div style={{ fontWeight: '600', color: colors.gray[600] }}>대상 게시글</div>
+                <div>{selectedComment.target_title || selectedComment.target_id}</div>
+                
+                <div style={{ fontWeight: '600', color: colors.gray[600] }}>작성자</div>
+                <div>{selectedComment.author_name} ({selectedComment.author_id})</div>
+                
+                <div style={{ fontWeight: '600', color: colors.gray[600] }}>작성일</div>
+                <div>{formatDate(selectedComment.created_at)}</div>
+                
+                {selectedComment.updated_at && selectedComment.updated_at !== selectedComment.created_at && (
+                  <>
+                    <div style={{ fontWeight: '600', color: colors.gray[600] }}>수정일</div>
+                    <div>{formatDate(selectedComment.updated_at)}</div>
+                  </>
+                )}
+                
+                {selectedComment.is_deleted && (
+                  <>
+                    <div style={{ fontWeight: '600', color: colors.gray[600] }}>삭제일</div>
+                    <div style={{ color: colors.red[600] }}>{formatDate(selectedComment.deleted_at)}</div>
+                  </>
+                )}
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>댓글 내용</label>
+                <div style={{ padding: '16px', backgroundColor: colors.white, border: `1px solid ${colors.gray[200]}`, borderRadius: '8px', minHeight: '100px' }}>
+                  {(() => {
+                    let content = selectedComment.content;
+                    
+                    // content가 문자열이고 JSON처럼 보이면 파싱 시도
+                    if (typeof content === 'string' && content.startsWith('[') && content.endsWith(']')) {
+                      try {
+                        const parsed = JSON.parse(content);
+                        if (Array.isArray(parsed)) {
+                          // 파싱된 배열에서 텍스트 추출
+                          return parsed.map((item: any) => {
+                            if (typeof item === 'string') return item;
+                            if (item.type === 'text' && item.content) return item.content;
+                            if (item.type === 'image') return '[이미지]';
+                            return '';
+                          }).filter(Boolean).join('\n');
+                        }
+                      } catch {
+                        // 파싱 실패시 원본 반환
+                        return content;
+                      }
+                    }
+                    
+                    // content가 이미 배열인 경우
+                    if (Array.isArray(content)) {
+                      return content.map((item: any) => {
+                        if (typeof item === 'string') return item;
+                        if (item.type === 'text' && item.content) return item.content;
+                        if (item.type === 'image') return '[이미지]';
+                        return '';
+                      }).filter(Boolean).join('\n');
+                    }
+                    
+                    // 일반 문자열인 경우
+                    if (typeof content === 'string') {
+                      return content;
+                    }
+                    
+                    // 기타 경우
+                    return JSON.stringify(content);
+                  })()}
+                </div>
+              </div>
+            </div>
+            <div style={styles.modalFooter}>
+              <button
+                onClick={() => setSelectedComment(null)}
+                style={styles.cancelButton}
+              >
+                닫기
+              </button>
+              {!selectedComment.is_deleted && (
+                <button
+                  onClick={() => {
+                    if (window.confirm('이 댓글을 삭제하시겠습니까?')) {
+                      deleteMutation.mutate(selectedComment.id);
+                      setSelectedComment(null);
+                    }
+                  }}
+                  style={styles.deleteButton}
+                  disabled={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? '삭제 중...' : '댓글 삭제'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Main Admin Component
 const AdminApp: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState('statistics');
+  const [activeTab, setActiveTab] = useState<TabType>('statistics');
   const [hoveredNavItem, setHoveredNavItem] = useState<string | null>(null);
 
   useEffect(() => {
@@ -6298,6 +9016,12 @@ const AdminApp: React.FC = () => {
         return <CommunityManagement />;
       case 'tags':
         return <TagManagement />;
+      case 'terms':
+        return <TermsManagement />;
+      case 'reports':
+        return <UserReportsManagement />;
+      case 'comments':
+        return <CommentsManagement />;
       default:
         return <StatisticsManagement />;
     }
@@ -6398,6 +9122,18 @@ const AdminApp: React.FC = () => {
               <button
                 style={{
                   ...styles.navItem,
+                  ...(activeTab === 'comments' ? styles.navItemActive : {}),
+                  ...(hoveredNavItem === 'comments' && activeTab !== 'comments' ? styles.navItemHover : {}),
+                }}
+                onClick={() => setActiveTab('comments')}
+                onMouseEnter={() => setHoveredNavItem('comments')}
+                onMouseLeave={() => setHoveredNavItem(null)}
+              >
+                댓글 관리
+              </button>
+              <button
+                style={{
+                  ...styles.navItem,
                   ...(activeTab === 'tags' ? styles.navItemActive : {}),
                   ...(hoveredNavItem === 'tags' && activeTab !== 'tags' ? styles.navItemHover : {}),
                 }}
@@ -6406,6 +9142,30 @@ const AdminApp: React.FC = () => {
                 onMouseLeave={() => setHoveredNavItem(null)}
               >
                 태그 관리
+              </button>
+              <button
+                style={{
+                  ...styles.navItem,
+                  ...(activeTab === 'terms' ? styles.navItemActive : {}),
+                  ...(hoveredNavItem === 'terms' && activeTab !== 'terms' ? styles.navItemHover : {}),
+                }}
+                onClick={() => setActiveTab('terms')}
+                onMouseEnter={() => setHoveredNavItem('terms')}
+                onMouseLeave={() => setHoveredNavItem(null)}
+              >
+                약관 설정
+              </button>
+              <button
+                style={{
+                  ...styles.navItem,
+                  ...(activeTab === 'reports' ? styles.navItemActive : {}),
+                  ...(hoveredNavItem === 'reports' && activeTab !== 'reports' ? styles.navItemHover : {}),
+                }}
+                onClick={() => setActiveTab('reports')}
+                onMouseEnter={() => setHoveredNavItem('reports')}
+                onMouseLeave={() => setHoveredNavItem(null)}
+              >
+                신고 관리
               </button>
             </nav>
             
