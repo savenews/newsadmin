@@ -3917,6 +3917,7 @@ const UserManagement: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showActivityModal, setShowActivityModal] = useState(false);
   const [statusFormData, setStatusFormData] = useState<api.UserStatusUpdate>({
     is_banned: false,
     role: 'USER',
@@ -4155,6 +4156,7 @@ const UserManagement: React.FC = () => {
                     <th style={styles.th}>ID</th>
                     <th style={styles.th}>이름</th>
                     <th style={styles.th}>이메일</th>
+                    <th style={styles.th}>가입</th>
                     <th style={styles.th}>역할</th>
                     <th style={styles.th}>상태</th>
                     <th style={styles.th}>포인트</th>
@@ -4177,6 +4179,29 @@ const UserManagement: React.FC = () => {
                       <td style={styles.td}>{user.id}</td>
                       <td style={styles.td}>{user.username || user.name}</td>
                       <td style={styles.td}>{user.email}</td>
+                      <td style={styles.td}>
+                        <span style={{
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: '500',
+                          backgroundColor: user.register_type === 'kakao' ? '#FEE500' : 
+                                         user.register_type === 'apple' ? colors.gray[900] : 
+                                         user.register_type === 'google' ? '#4285F4' :
+                                         colors.blue[100],
+                          color: user.register_type === 'kakao' ? '#000000' : 
+                                 user.register_type === 'apple' ? colors.white : 
+                                 user.register_type === 'google' ? colors.white :
+                                 colors.blue[600],
+                          display: 'inline-block',
+                        }}>
+                          {user.register_type === 'kakao' ? '카카오' : 
+                           user.register_type === 'apple' ? '애플' : 
+                           user.register_type === 'google' ? '구글' :
+                           user.register_type === 'email' ? '이메일' :
+                           user.register_type || '일반'}
+                        </span>
+                      </td>
                       <td style={styles.td}>
                         <span style={{
                           padding: '4px 10px',
@@ -4214,12 +4239,12 @@ const UserManagement: React.FC = () => {
                         }
                       </td>
                       <td style={styles.td}>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
                           <button
                             style={{
                               ...styles.actionButton,
-                              padding: '6px 12px',
-                              fontSize: '13px',
+                              padding: '5px 10px',
+                              fontSize: '12px',
                             }}
                             onClick={() => handleViewDetail(user)}
                           >
@@ -4228,9 +4253,24 @@ const UserManagement: React.FC = () => {
                           <button
                             style={{
                               ...styles.actionButton,
+                              backgroundColor: colors.blue[500],
+                              color: colors.white,
+                              padding: '5px 10px',
+                              fontSize: '12px',
+                            }}
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setShowActivityModal(true);
+                            }}
+                          >
+                            활동
+                          </button>
+                          <button
+                            style={{
+                              ...styles.actionButton,
                               ...styles.editButton,
-                              padding: '6px 12px',
-                              fontSize: '13px',
+                              padding: '5px 10px',
+                              fontSize: '12px',
                             }}
                             onClick={() => handleEditStatus(user)}
                           >
@@ -4263,11 +4303,25 @@ const UserManagement: React.FC = () => {
             }} 
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>회원 상세 정보</h2>
+            <div style={{ 
+              ...styles.modalHeader,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: `1px solid ${colors.gray[200]}`,
+            }}>
+              <h2 style={{ ...styles.modalTitle, margin: 0 }}>회원 상세 정보</h2>
               <button
                 onClick={() => setShowDetailModal(false)}
-                style={styles.modalCloseButton}
+                style={{ 
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  color: colors.gray[600],
+                  lineHeight: '1',
+                }}
               >
                 ✕
               </button>
@@ -4294,6 +4348,29 @@ const UserManagement: React.FC = () => {
                       <div style={styles.detailItem}>
                         <span style={styles.detailLabel}>이메일</span>
                         <span style={styles.detailValue}>{userDetail.user_info.email}</span>
+                      </div>
+                      <div style={styles.detailItem}>
+                        <span style={styles.detailLabel}>가입 방법</span>
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          backgroundColor: userDetail.user_info.register_type === 'kakao' ? '#FEE500' : 
+                                         userDetail.user_info.register_type === 'apple' ? colors.gray[900] : 
+                                         userDetail.user_info.register_type === 'google' ? '#4285F4' :
+                                         colors.blue[100],
+                          color: userDetail.user_info.register_type === 'kakao' ? '#000000' : 
+                                 userDetail.user_info.register_type === 'apple' ? colors.white : 
+                                 userDetail.user_info.register_type === 'google' ? colors.white :
+                                 colors.blue[600],
+                        }}>
+                          {userDetail.user_info.register_type === 'kakao' ? '카카오' : 
+                           userDetail.user_info.register_type === 'apple' ? '애플' : 
+                           userDetail.user_info.register_type === 'google' ? '구글' :
+                           userDetail.user_info.register_type === 'email' ? '이메일' :
+                           userDetail.user_info.register_type || '일반'}
+                        </span>
                       </div>
                       <div style={styles.detailItem}>
                         <span style={styles.detailLabel}>역할</span>
@@ -4385,12 +4462,26 @@ const UserManagement: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <form onSubmit={handleStatusSubmit}>
-              <div style={styles.modalHeader}>
-                <h2 style={styles.modalTitle}>회원 상태 변경</h2>
+              <div style={{ 
+                ...styles.modalHeader,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                borderBottom: `1px solid ${colors.gray[200]}`,
+              }}>
+                <h2 style={{ ...styles.modalTitle, margin: 0 }}>회원 상태 변경</h2>
                 <button
                   type="button"
                   onClick={() => setShowStatusModal(false)}
-                  style={styles.modalCloseButton}
+                  style={{ 
+                    background: 'transparent',
+                    border: 'none',
+                    fontSize: '20px',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    color: colors.gray[600],
+                    lineHeight: '1',
+                  }}
                 >
                   ✕
                 </button>
@@ -4473,6 +4564,68 @@ const UserManagement: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 활동 모달 */}
+      {showActivityModal && selectedUser && (
+        <div style={styles.modal} onClick={() => setShowActivityModal(false)}>
+          <div style={{
+            ...styles.modalContent, 
+            maxWidth: '700px',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ 
+              ...styles.modalHeader, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              flexShrink: 0,
+              borderBottom: `1px solid ${colors.gray[200]}`,
+            }}>
+              <h2 style={{ ...styles.modalTitle, margin: 0 }}>사용자 활동 정보</h2>
+              <button
+                onClick={() => setShowActivityModal(false)}
+                style={{ 
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  color: colors.gray[600],
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{
+              ...styles.modalBody,
+              flex: 1,
+              overflowY: 'auto',
+              padding: '20px',
+            }}>
+              <AuthorDetailContent 
+                authorId={selectedUser.id} 
+                authorName={selectedUser.username || selectedUser.name || selectedUser.email} 
+              />
+            </div>
+            <div style={{
+              ...styles.modalFooter,
+              flexShrink: 0,
+              borderTop: `1px solid ${colors.gray[200]}`,
+              padding: '16px 20px',
+            }}>
+              <button
+                onClick={() => setShowActivityModal(false)}
+                style={styles.cancelButton}
+              >
+                닫기
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -7609,6 +7762,8 @@ const UserReportsManagement: React.FC = () => {
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<api.UserReport | null>(null);
   const [showProcessModal, setShowProcessModal] = useState(false);
+  const [showReporterDetailModal, setShowReporterDetailModal] = useState(false);
+  const [selectedReporter, setSelectedReporter] = useState<{ id: string; name: string } | null>(null);
   const [processFormData, setProcessFormData] = useState<api.UserReportUpdate>({
     status: 'PENDING',
     admin_note: '',
@@ -7898,7 +8053,31 @@ const UserReportsManagement: React.FC = () => {
                           {report.description}
                         </div>
                       </td>
-                      <td style={styles.td}>{report.reporter_name || 'Unknown'}</td>
+                      <td style={styles.td}>
+                        <div 
+                          onClick={() => {
+                            if (report.reporter_id) {
+                              setSelectedReporter({ 
+                                id: report.reporter_id, 
+                                name: report.reporter_name || 'Unknown' 
+                              });
+                              setShowReporterDetailModal(true);
+                            }
+                          }}
+                          style={{ 
+                            cursor: report.reporter_id ? 'pointer' : 'default',
+                            color: report.reporter_id ? colors.blue[600] : 'inherit',
+                            textDecoration: report.reporter_id ? 'underline' : 'none',
+                          }}
+                        >
+                          {report.reporter_name || 'Unknown'}
+                        </div>
+                        {report.reporter_id && (
+                          <div style={{ fontSize: '11px', color: colors.gray[500], marginTop: '2px' }}>
+                            ID: {report.reporter_id}
+                          </div>
+                        )}
+                      </td>
                       <td style={styles.td}>
                         <span style={{
                           padding: '4px 10px',
@@ -8192,6 +8371,191 @@ const UserReportsManagement: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* 신고자 상세 모달 */}
+      {showReporterDetailModal && selectedReporter && (
+        <div style={styles.modal} onClick={() => setShowReporterDetailModal(false)}>
+          <div style={{
+            ...styles.modalContent, 
+            maxWidth: '700px',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ 
+              ...styles.modalHeader, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              flexShrink: 0,
+              borderBottom: `1px solid ${colors.gray[200]}`,
+            }}>
+              <h2 style={{ ...styles.modalTitle, margin: 0 }}>신고자 정보</h2>
+              <button
+                onClick={() => setShowReporterDetailModal(false)}
+                style={{ 
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  color: colors.gray[600],
+                  lineHeight: '1',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{
+              ...styles.modalBody,
+              flex: 1,
+              overflowY: 'auto',
+              padding: '20px',
+            }}>
+              <ReporterDetailContent 
+                reporterId={selectedReporter.id} 
+                reporterName={selectedReporter.name} 
+              />
+            </div>
+            <div style={{
+              ...styles.modalFooter,
+              flexShrink: 0,
+              borderTop: `1px solid ${colors.gray[200]}`,
+              padding: '16px 20px',
+            }}>
+              <button
+                onClick={() => setShowReporterDetailModal(false)}
+                style={styles.cancelButton}
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Reporter Detail Component - 신고자의 현재 정보를 표시
+const ReporterDetailContent: React.FC<{ reporterId: string; reporterName: string }> = ({ reporterId, reporterName }) => {
+  // 사용자 현재 정보 조회
+  const { data: userData, isLoading, error } = useQuery({
+    queryKey: ['userDetail', reporterId],
+    queryFn: async () => {
+      try {
+        return await api.getUserDetail(reporterId);
+      } catch (error) {
+        console.error('Failed to fetch user details:', error);
+        throw error;
+      }
+    },
+  });
+
+  if (isLoading) {
+    return <div style={{ padding: '20px', textAlign: 'center' }}>사용자 정보를 불러오는 중...</div>;
+  }
+
+  const user = userData?.user_info || userData?.user || userData;
+  const currentName = user?.name || user?.username || reporterName;
+
+  return (
+    <div>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: '120px 1fr', 
+        gap: '12px',
+        padding: '16px',
+        backgroundColor: colors.gray[50],
+        borderRadius: '8px',
+        marginBottom: '16px'
+      }}>
+        <div style={{ fontWeight: '600', color: colors.gray[600] }}>사용자 ID</div>
+        <div>{reporterId}</div>
+        
+        <div style={{ fontWeight: '600', color: colors.gray[600] }}>현재 닉네임</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>{currentName}</span>
+          {currentName !== reporterName && (
+            <span style={{ 
+              fontSize: '12px', 
+              color: colors.orange[600],
+              backgroundColor: colors.orange[600] + '20',
+              padding: '2px 6px',
+              borderRadius: '4px',
+            }}>
+              변경됨 (신고 당시: {reporterName})
+            </span>
+          )}
+        </div>
+        
+        {user?.email && (
+          <>
+            <div style={{ fontWeight: '600', color: colors.gray[600] }}>이메일</div>
+            <div>{user.email}</div>
+          </>
+        )}
+        
+        {user?.created_at && (
+          <>
+            <div style={{ fontWeight: '600', color: colors.gray[600] }}>가입일</div>
+            <div>{new Date(user.created_at).toLocaleDateString('ko-KR')}</div>
+          </>
+        )}
+        
+        <div style={{ fontWeight: '600', color: colors.gray[600] }}>상태</div>
+        <div>
+          {user?.is_banned ? (
+            <span style={{ 
+              padding: '2px 8px', 
+              backgroundColor: colors.red[100], 
+              color: colors.red[600], 
+              borderRadius: '4px',
+              fontSize: '13px',
+              fontWeight: '500',
+            }}>
+              차단됨
+            </span>
+          ) : user?.is_deleted ? (
+            <span style={{ 
+              padding: '2px 8px', 
+              backgroundColor: colors.gray[200], 
+              color: colors.gray[600], 
+              borderRadius: '4px',
+              fontSize: '13px',
+              fontWeight: '500',
+            }}>
+              탈퇴
+            </span>
+          ) : (
+            <span style={{ 
+              padding: '2px 8px', 
+              backgroundColor: colors.green[100], 
+              color: colors.green[600], 
+              borderRadius: '4px',
+              fontSize: '13px',
+              fontWeight: '500',
+            }}>
+              활성
+            </span>
+          )}
+        </div>
+      </div>
+
+      {error && (
+        <div style={{ 
+          padding: '16px', 
+          backgroundColor: colors.warning + '10', 
+          borderRadius: '8px',
+          border: `1px solid ${colors.warning + '30'}`,
+        }}>
+          <p style={{ margin: 0, color: colors.gray[700], fontSize: '14px' }}>
+            ⚠️ 사용자의 현재 정보를 불러올 수 없습니다. 
+            신고 당시 닉네임: <strong>{reporterName}</strong>
+          </p>
+        </div>
+      )}
     </div>
   );
 };
@@ -8434,20 +8798,23 @@ const CommentsManagement: React.FC = () => {
   const [pageSize, setPageSize] = useState(20);
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [authorSearchInput, setAuthorSearchInput] = useState('');
+  const [authorSearchQuery, setAuthorSearchQuery] = useState('');
   const [targetTypeFilter, setTargetTypeFilter] = useState<'all' | 'news' | 'community'>('all');
   const [deletedFilter, setDeletedFilter] = useState<'all' | 'deleted' | 'active'>('all');
   const [sortBy, setSortBy] = useState<'created_at_desc' | 'created_at_asc'>('created_at_desc');
   const [selectedComment, setSelectedComment] = useState<any>(null);
+  const [selectedAuthor, setSelectedAuthor] = useState<any>(null);
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['comments', page, pageSize, searchQuery, targetTypeFilter, deletedFilter, sortBy],
+    queryKey: ['comments', page, pageSize, searchQuery, authorSearchQuery, targetTypeFilter, deletedFilter, sortBy],
     queryFn: async () => {
       const response = await api.getCommentsList(
         page, 
         pageSize, 
         searchQuery || undefined,
-        undefined,
-        undefined,
+        authorSearchQuery || undefined,  // authorId parameter (searches by author name in API)
+        undefined,  // targetId
         targetTypeFilter !== 'all' ? targetTypeFilter : undefined,
         deletedFilter === 'deleted' ? true : deletedFilter === 'active' ? false : undefined,
         sortBy
@@ -8492,6 +8859,7 @@ const CommentsManagement: React.FC = () => {
 
   const handleSearch = () => {
     setSearchQuery(searchInput);
+    setAuthorSearchQuery(authorSearchInput);
     setPage(1);
   };
 
@@ -8540,7 +8908,7 @@ const CommentsManagement: React.FC = () => {
         borderRadius: '8px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
       }}>
-        <div style={{ display: 'flex', gap: '8px', flex: '1 1 auto', minWidth: '300px' }}>
+        <div style={{ display: 'flex', gap: '8px', flex: '1 1 auto', minWidth: '300px', flexWrap: 'wrap' }}>
           <input
             type="text"
             placeholder="댓글 내용 검색..."
@@ -8548,7 +8916,22 @@ const CommentsManagement: React.FC = () => {
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyPress={handleKeyPress}
             style={{
-              flex: 1,
+              flex: '1 1 200px',
+              padding: '10px 12px',
+              fontSize: '14px',
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '6px',
+              outline: 'none',
+            }}
+          />
+          <input
+            type="text"
+            placeholder="작성자 검색..."
+            value={authorSearchInput}
+            onChange={(e) => setAuthorSearchInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            style={{
+              flex: '1 1 150px',
               padding: '10px 12px',
               fontSize: '14px',
               border: `1px solid ${colors.gray[300]}`,
@@ -8693,8 +9076,13 @@ const CommentsManagement: React.FC = () => {
                         </div>
                       </td>
                       <td style={styles.tableCell}>
-                        <div>
-                          <div style={{ fontWeight: '500' }}>{comment.author_name}</div>
+                        <div 
+                          onClick={() => setSelectedAuthor(comment)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <div style={{ fontWeight: '500', color: colors.blue[600], textDecoration: 'underline' }}>
+                            {comment.author_name}
+                          </div>
                           <div style={{ fontSize: '12px', color: colors.gray[500] }}>{comment.author_id}</div>
                         </div>
                       </td>
@@ -8842,11 +9230,25 @@ const CommentsManagement: React.FC = () => {
       {selectedComment && (
         <div style={styles.modal} onClick={() => setSelectedComment(null)}>
           <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div style={{ ...styles.modalHeader, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ 
+              ...styles.modalHeader, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              borderBottom: `1px solid ${colors.gray[200]}`,
+            }}>
               <h2 style={{ ...styles.modalTitle, margin: 0 }}>댓글 상세</h2>
               <button
                 onClick={() => setSelectedComment(null)}
-                style={{ ...styles.modalCloseButton, position: 'relative', top: 'auto', right: 'auto' }}
+                style={{ 
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  color: colors.gray[600],
+                  lineHeight: '1',
+                }}
               >
                 ✕
               </button>
@@ -8969,6 +9371,560 @@ const CommentsManagement: React.FC = () => {
           </div>
         </div>
       )}
+
+      {selectedAuthor && (
+        <div style={styles.modal} onClick={() => setSelectedAuthor(null)}>
+          <div style={{
+            ...styles.modalContent, 
+            maxWidth: '700px',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ 
+              ...styles.modalHeader, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              flexShrink: 0,
+              borderBottom: `1px solid ${colors.gray[200]}`,
+            }}>
+              <h2 style={{ ...styles.modalTitle, margin: 0 }}>작성자 상세 정보</h2>
+              <button
+                onClick={() => setSelectedAuthor(null)}
+                style={{ 
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  color: colors.gray[600],
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{
+              ...styles.modalBody,
+              flex: 1,
+              overflowY: 'auto',
+              padding: '20px',
+            }}>
+              <AuthorDetailContent authorId={selectedAuthor.author_id} authorName={selectedAuthor.author_name} />
+            </div>
+            <div style={{
+              ...styles.modalFooter,
+              flexShrink: 0,
+              borderTop: `1px solid ${colors.gray[200]}`,
+              padding: '16px 20px',
+            }}>
+              <button
+                onClick={() => setSelectedAuthor(null)}
+                style={styles.cancelButton}
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Author Detail Component
+const AuthorDetailContent: React.FC<{ authorId: string; authorName: string }> = ({ authorId, authorName }) => {
+  const [commentsPage, setCommentsPage] = useState(1);
+  const [postsPage, setPostsPage] = useState(1);
+  const [displayedComments, setDisplayedComments] = useState<any[]>([]);
+  const [displayedPosts, setDisplayedPosts] = useState<any[]>([]);
+  
+  const { data: userData, isLoading, error } = useQuery({
+    queryKey: ['userDetail', authorId],
+    queryFn: async () => {
+      try {
+        return await api.getUserDetail(authorId);
+      } catch (error) {
+        console.error('Failed to fetch user details:', error);
+        throw error;
+      }
+    },
+  });
+
+  const { data: commentsData, isLoading: commentsLoading } = useQuery({
+    queryKey: ['userComments', authorId, commentsPage],
+    queryFn: async () => {
+      // getCommentsList(page, pageSize, search, authorSearch, targetId, targetType, isDeleted, sort)
+      return await api.getCommentsList(commentsPage, 5, undefined, authorId, undefined, undefined, undefined, 'created_at_desc');
+    },
+  });
+
+  const { data: postsData, isLoading: postsLoading } = useQuery({
+    queryKey: ['userPosts', authorId, postsPage],
+    queryFn: async () => {
+      // getCommunityPosts(page, pageSize, search, authorId, category, sort)
+      return await api.getCommunityPosts(postsPage, 5, undefined, authorId, undefined, 'created_at_desc');
+    },
+  });
+  
+  // Update displayed comments when new data arrives
+  useEffect(() => {
+    if (commentsData?.comments && Array.isArray(commentsData.comments)) {
+      if (commentsPage === 1) {
+        setDisplayedComments(commentsData.comments);
+      } else {
+        setDisplayedComments(prev => {
+          // Ensure commentsData.comments is an array
+          const newComments = Array.isArray(commentsData.comments) ? commentsData.comments : [];
+          return [...prev, ...newComments];
+        });
+      }
+    }
+  }, [commentsData, commentsPage]);
+  
+  // Update displayed posts when new data arrives
+  useEffect(() => {
+    if (postsData?.posts && Array.isArray(postsData.posts)) {
+      if (postsPage === 1) {
+        setDisplayedPosts(postsData.posts);
+      } else {
+        setDisplayedPosts(prev => {
+          // Ensure postsData.posts is an array
+          const newPosts = Array.isArray(postsData.posts) ? postsData.posts : [];
+          return [...prev, ...newPosts];
+        });
+      }
+    }
+  }, [postsData, postsPage]);
+
+  if (isLoading) {
+    return <div style={{ padding: '20px', textAlign: 'center' }}>사용자 정보를 불러오는 중...</div>;
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: '20px' }}>
+        <div style={{ 
+          padding: '16px', 
+          backgroundColor: colors.red[50], 
+          borderRadius: '8px',
+          marginBottom: '16px'
+        }}>
+          <p style={{ margin: 0, color: colors.red[700] }}>사용자 상세 정보를 불러올 수 없습니다.</p>
+          <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: colors.red[600] }}>기본 정보만 표시됩니다.</p>
+        </div>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: '120px 1fr', 
+          gap: '12px',
+          padding: '16px',
+          backgroundColor: colors.gray[50],
+          borderRadius: '8px',
+        }}>
+          <div style={{ fontWeight: '600', color: colors.gray[600] }}>사용자 ID</div>
+          <div>{authorId}</div>
+          <div style={{ fontWeight: '600', color: colors.gray[600] }}>사용자명</div>
+          <div>{authorName}</div>
+        </div>
+      </div>
+    );
+  }
+
+  const user = userData?.user || userData;
+
+  return (
+    <div>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: '120px 1fr', 
+        gap: '12px',
+        padding: '16px',
+        backgroundColor: colors.gray[50],
+        borderRadius: '8px',
+        marginBottom: '16px'
+      }}>
+        <div style={{ fontWeight: '600', color: colors.gray[600] }}>사용자 ID</div>
+        <div>{user.id || authorId}</div>
+        
+        <div style={{ fontWeight: '600', color: colors.gray[600] }}>사용자명</div>
+        <div>{user.name || authorName}</div>
+        
+        <div style={{ fontWeight: '600', color: colors.gray[600] }}>상태</div>
+        <div>
+          {user.is_banned ? (
+            <span style={{ 
+              padding: '2px 8px', 
+              backgroundColor: colors.red[100], 
+              color: colors.red[600], 
+              borderRadius: '4px',
+              fontSize: '13px',
+              fontWeight: '500',
+            }}>
+              차단됨
+            </span>
+          ) : user.is_deleted ? (
+            <span style={{ 
+              padding: '2px 8px', 
+              backgroundColor: colors.gray[200], 
+              color: colors.gray[600], 
+              borderRadius: '4px',
+              fontSize: '13px',
+              fontWeight: '500',
+            }}>
+              탈퇴
+            </span>
+          ) : (
+            <span style={{ 
+              padding: '2px 8px', 
+              backgroundColor: colors.green[100], 
+              color: colors.green[600], 
+              borderRadius: '4px',
+              fontSize: '13px',
+              fontWeight: '500',
+            }}>
+              활성
+            </span>
+          )}
+        </div>
+        
+        {user.subscription_status && (
+          <>
+            <div style={{ fontWeight: '600', color: colors.gray[600] }}>구독 상태</div>
+            <div>
+              <span style={{ 
+                padding: '2px 8px', 
+                backgroundColor: user.subscription_status === 'active' ? colors.blue[100] : colors.gray[100], 
+                color: user.subscription_status === 'active' ? colors.blue[600] : colors.gray[600], 
+                borderRadius: '4px',
+                fontSize: '13px',
+                fontWeight: '500',
+              }}>
+                {user.subscription_status === 'active' ? '활성' : '비활성'}
+              </span>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div style={{ marginTop: '16px' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '10px', color: colors.gray[700] }}>
+          최근 활동
+        </h3>
+        
+        <div style={{ marginBottom: '16px' }}>
+          <h4 style={{ 
+            fontSize: '14px', 
+            fontWeight: '500', 
+            marginBottom: '8px', 
+            color: colors.gray[600],
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <span>댓글</span>
+            <span style={{ 
+              fontSize: '13px', 
+              fontWeight: 'normal',
+              padding: '2px 8px',
+              backgroundColor: colors.blue[100],
+              color: colors.blue[600],
+              borderRadius: '12px'
+            }}>
+              전체 {commentsData?.total_count || 0}개
+            </span>
+          </h4>
+          {displayedComments.length > 0 ? (
+            <div style={{ 
+              border: `1px solid ${colors.gray[200]}`, 
+              borderRadius: '6px',
+              overflow: 'hidden'
+            }}>
+              {displayedComments.map((comment: any, index: number) => {
+                // Parse comment content
+                let displayContent = '';
+                if (typeof comment.content === 'string') {
+                  if (comment.content.startsWith('[') && comment.content.endsWith(']')) {
+                    try {
+                      const parsed = JSON.parse(comment.content);
+                      if (Array.isArray(parsed)) {
+                        displayContent = parsed.map((item: any) => {
+                          if (typeof item === 'string') return item;
+                          if (item.type === 'text' && item.content) return item.content;
+                          if (item.type === 'image') return '[이미지]';
+                          return '';
+                        }).filter(Boolean).join(' ');
+                      } else {
+                        displayContent = comment.content;
+                      }
+                    } catch {
+                      displayContent = comment.content;
+                    }
+                  } else {
+                    displayContent = comment.content;
+                  }
+                } else if (Array.isArray(comment.content)) {
+                  displayContent = comment.content.map((item: any) => {
+                    if (typeof item === 'string') return item;
+                    if (item.type === 'text' && item.content) return item.content;
+                    if (item.type === 'image') return '[이미지]';
+                    return '';
+                  }).filter(Boolean).join(' ');
+                }
+
+                return (
+                  <div 
+                    key={comment.id} 
+                    style={{ 
+                      padding: '12px', 
+                      borderBottom: index < displayedComments.length - 1 ? `1px solid ${colors.gray[100]}` : 'none',
+                      backgroundColor: index % 2 === 0 ? colors.gray[50] : colors.white,
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = colors.gray[100];
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = index % 2 === 0 ? colors.gray[50] : colors.white;
+                    }}
+                    onClick={() => {
+                      // Navigate to the full URL
+                      if (comment.target_type === 'news' && comment.target_id) {
+                        window.open(`https://www.saveticker.com/news/${comment.target_id}`, '_blank');
+                      } else if (comment.target_type === 'community' && comment.target_id) {
+                        window.open(`https://www.saveticker.com/community/${comment.target_id}`, '_blank');
+                      }
+                    }}
+                    title="클릭하여 게시글로 이동"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{ 
+                        fontSize: '11px',
+                        padding: '2px 6px',
+                        backgroundColor: comment.target_type === 'news' ? colors.blue[100] : colors.green[100],
+                        color: comment.target_type === 'news' ? colors.blue[600] : colors.green[600],
+                        borderRadius: '3px',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {comment.target_type === 'news' ? '뉴스' : '커뮤니티'}
+                      </span>
+                      <span style={{ fontSize: '11px', color: colors.gray[500] }}>
+                        {new Date(comment.created_at).toLocaleDateString('ko-KR')}
+                      </span>
+                    </div>
+                    {comment.target_title && (
+                      <div style={{ 
+                        fontSize: '12px', 
+                        fontWeight: '500', 
+                        color: colors.gray[700], 
+                        marginBottom: '4px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {comment.target_title}
+                      </div>
+                    )}
+                    <div style={{ 
+                      fontSize: '13px', 
+                      color: colors.gray[600], 
+                      lineHeight: '1.4',
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                    }}>
+                      {displayContent || '내용 없음'}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{ 
+              padding: '20px', 
+              textAlign: 'center', 
+              color: colors.gray[500],
+              backgroundColor: colors.gray[50],
+              borderRadius: '6px',
+              border: `1px solid ${colors.gray[200]}`
+            }}>
+              작성한 댓글이 없습니다.
+            </div>
+          )}
+          {commentsData && Number(commentsData.total_count) > displayedComments.length && (
+              <div style={{ textAlign: 'center', padding: '8px' }}>
+                <button
+                  onClick={() => setCommentsPage(prev => prev + 1)}
+                  disabled={commentsLoading}
+                  style={{
+                    padding: '6px 16px',
+                    fontSize: '13px',
+                    color: colors.primary,
+                    backgroundColor: colors.white,
+                    border: `1px solid ${colors.primary}`,
+                    borderRadius: '4px',
+                    cursor: commentsLoading ? 'not-allowed' : 'pointer',
+                    opacity: commentsLoading ? 0.5 : 1,
+                  }}
+                >
+                  {commentsLoading ? '불러오는 중...' : `더 보기 (${displayedComments.length}/${commentsData.total_count})`}
+                </button>
+              </div>
+            )}
+        </div>
+
+        <div style={{ marginBottom: '16px' }}>
+          <h4 style={{ 
+            fontSize: '14px', 
+            fontWeight: '500', 
+            marginBottom: '8px', 
+            color: colors.gray[600],
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <span>게시글</span>
+            <span style={{ 
+              fontSize: '13px', 
+              fontWeight: 'normal',
+              padding: '2px 8px',
+              backgroundColor: colors.green[100],
+              color: colors.green[600],
+              borderRadius: '12px'
+            }}>
+              전체 {postsData?.total_count || 0}개
+            </span>
+          </h4>
+          {displayedPosts.length > 0 ? (
+            <div style={{ 
+              border: `1px solid ${colors.gray[200]}`, 
+              borderRadius: '6px',
+              overflow: 'hidden'
+            }}>
+              {displayedPosts.map((post: any, index: number) => (
+                <div 
+                  key={post.id} 
+                  style={{ 
+                    padding: '12px', 
+                    borderBottom: index < displayedPosts.length - 1 ? `1px solid ${colors.gray[100]}` : 'none',
+                    backgroundColor: index % 2 === 0 ? colors.gray[50] : colors.white,
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.gray[100];
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = index % 2 === 0 ? colors.gray[50] : colors.white;
+                  }}
+                  onClick={() => {
+                    // Navigate to the full URL
+                    window.open(`https://www.saveticker.com/community/${post.id}`, '_blank');
+                  }}
+                  title="클릭하여 게시글로 이동"
+                >
+                  <div style={{ 
+                    fontSize: '13px', 
+                    fontWeight: '500', 
+                    color: colors.gray[800],
+                    marginBottom: '6px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {post.title}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '11px', color: colors.gray[500] }}>
+                      {new Date(post.created_at).toLocaleDateString('ko-KR')}
+                    </span>
+                    <div style={{ fontSize: '11px', color: colors.gray[600], display: 'flex', gap: '8px' }}>
+                      <span>조회 {post.view_count || 0}</span>
+                      <span>좋아요 {post.like_count || 0}</span>
+                      <span>댓글 {post.comment_count || 0}</span>
+                    </div>
+                  </div>
+                  {post.content && (
+                    <div style={{ 
+                      fontSize: '12px', 
+                      color: colors.gray[600], 
+                      lineHeight: '1.4',
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                    }}>
+                      {(() => {
+                        let contentText = '';
+                        if (typeof post.content === 'string') {
+                          if (post.content.startsWith('[') && post.content.endsWith(']')) {
+                            try {
+                              const parsed = JSON.parse(post.content);
+                              if (Array.isArray(parsed)) {
+                                contentText = parsed.map((item: any) => {
+                                  if (typeof item === 'string') return item;
+                                  if (item.type === 'text' && item.content) return item.content;
+                                  return '';
+                                }).filter(Boolean).join(' ');
+                              } else {
+                                contentText = post.content;
+                              }
+                            } catch {
+                              contentText = post.content;
+                            }
+                          } else {
+                            contentText = post.content;
+                          }
+                        } else if (Array.isArray(post.content)) {
+                          contentText = post.content.map((item: any) => {
+                            if (typeof item === 'string') return item;
+                            if (item.type === 'text' && item.content) return item.content;
+                            return '';
+                          }).filter(Boolean).join(' ');
+                        }
+                        return contentText || '';
+                      })()}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ 
+              padding: '20px', 
+              textAlign: 'center', 
+              color: colors.gray[500],
+              backgroundColor: colors.gray[50],
+              borderRadius: '6px',
+              border: `1px solid ${colors.gray[200]}`
+            }}>
+              작성한 게시글이 없습니다.
+            </div>
+          )}
+          {postsData && Number(postsData.total_count) > displayedPosts.length && (
+              <div style={{ textAlign: 'center', padding: '8px' }}>
+                <button
+                  onClick={() => setPostsPage(prev => prev + 1)}
+                  disabled={postsLoading}
+                  style={{
+                    padding: '6px 16px',
+                    fontSize: '13px',
+                    color: colors.primary,
+                    backgroundColor: colors.white,
+                    border: `1px solid ${colors.primary}`,
+                    borderRadius: '4px',
+                    cursor: postsLoading ? 'not-allowed' : 'pointer',
+                    opacity: postsLoading ? 0.5 : 1,
+                  }}
+                >
+                  {postsLoading ? '불러오는 중...' : `더 보기 (${displayedPosts.length}/${postsData.total_count})`}
+                </button>
+              </div>
+            )}
+        </div>
+      </div>
     </div>
   );
 };

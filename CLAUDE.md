@@ -1,3 +1,4 @@
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -21,6 +22,8 @@ npm run build
 # Run tests (if any)
 npm test
 ```
+
+**Note**: 빌드 테스트는 필요없음 - hotfix dev 모드 실행 중
 
 ## Architecture
 

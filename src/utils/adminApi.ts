@@ -433,6 +433,7 @@ export const getCommunityPosts = async (
   page: number = 1, 
   pageSize: number = 20,
   search?: string,
+  authorId?: string,
   category?: string,
   sort: string = 'created_at_desc'
 ) => {
@@ -442,6 +443,7 @@ export const getCommunityPosts = async (
     sort: sort,
   });
   if (search) params.append('search', search);
+  if (authorId) params.append('author_id', authorId);
   if (category) params.append('category', category);
   
   return apiCall(`/api/community/list?${params}`);
@@ -657,7 +659,7 @@ export const getCommentsList = async (
   page: number = 1,
   pageSize: number = 20,
   search?: string,
-  authorId?: string,
+  authorSearch?: string,  // Can be author_id or author_name
   targetId?: string,
   targetType?: 'news' | 'community',
   isDeleted?: boolean,
@@ -670,7 +672,15 @@ export const getCommentsList = async (
   });
   
   if (search) params.append('search', search);
-  if (authorId) params.append('author_id', authorId);
+  if (authorSearch) {
+    // Try to determine if it's an ID or name
+    // If it looks like a UUID or numeric ID, use author_id, otherwise use author_name
+    if (/^[0-9a-f-]+$/i.test(authorSearch) || /^\d+$/.test(authorSearch)) {
+      params.append('author_id', authorSearch);
+    } else {
+      params.append('author_name', authorSearch);
+    }
+  }
   if (targetId) params.append('target_id', targetId);
   if (targetType) params.append('target_type', targetType);
   if (isDeleted !== undefined) params.append('is_deleted', isDeleted.toString());
