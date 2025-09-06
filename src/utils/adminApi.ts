@@ -75,7 +75,7 @@ export interface NewsData {
 }
 
 // News APIs
-export const getNews = async (search?: string, page: number = 1, pageSize: number = 20, sort: string = 'created_at_desc') => {
+export const getNews = async (search?: string, page: number = 1, pageSize: number = 20, sort: string = 'created_at_desc', includeDeleted: boolean = false) => {
   const params = new URLSearchParams({
     page: page.toString(),
     page_size: pageSize.toString(),
@@ -83,6 +83,9 @@ export const getNews = async (search?: string, page: number = 1, pageSize: numbe
   });
   if (search && search.trim() !== '') {
     params.append('search', search.trim());
+  }
+  if (includeDeleted) {
+    params.append('include_deleted', 'true');
   }
   
   console.log('Fetching news with params:', params.toString());
@@ -183,7 +186,8 @@ export const getUserList = async (
   search?: string,
   role?: string,
   isBanned?: boolean,
-  sort: string = 'created_at_desc'
+  sort: string = 'created_at_desc',
+  includeDeleted: boolean = false
 ) => {
   const params = new URLSearchParams({
     page: page.toString(),
@@ -199,6 +203,9 @@ export const getUserList = async (
   }
   if (isBanned !== undefined) {
     params.append('is_banned', isBanned.toString());
+  }
+  if (includeDeleted) {
+    params.append('include_deleted', 'true');
   }
   
   return apiCall(`/admin-api/user/list?${params}`);
@@ -435,7 +442,8 @@ export const getCommunityPosts = async (
   search?: string,
   authorId?: string,
   category?: string,
-  sort: string = 'created_at_desc'
+  sort: string = 'created_at_desc',
+  includeDeleted: boolean = false
 ) => {
   const params = new URLSearchParams({
     page: page.toString(),
@@ -445,6 +453,7 @@ export const getCommunityPosts = async (
   if (search) params.append('search', search);
   if (authorId) params.append('author_id', authorId);
   if (category) params.append('category', category);
+  if (includeDeleted) params.append('include_deleted', 'true');
   
   return apiCall(`/api/community/list?${params}`);
 };
@@ -663,7 +672,8 @@ export const getCommentsList = async (
   targetId?: string,
   targetType?: 'news' | 'community',
   isDeleted?: boolean,
-  sort: 'created_at_desc' | 'created_at_asc' = 'created_at_desc'
+  sort: 'created_at_desc' | 'created_at_asc' = 'created_at_desc',
+  includeDeleted: boolean = false
 ): Promise<CommentsResponse> => {
   const params = new URLSearchParams({
     page: page.toString(),
@@ -684,6 +694,7 @@ export const getCommentsList = async (
   if (targetId) params.append('target_id', targetId);
   if (targetType) params.append('target_type', targetType);
   if (isDeleted !== undefined) params.append('is_deleted', isDeleted.toString());
+  if (includeDeleted) params.append('include_deleted', 'true');
   
   return apiCall(`/admin-api/comments/list?${params}`);
 };

@@ -921,8 +921,18 @@ const Login: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
     
     try {
       const response = await api.login(email, password);
+      
+      // role 체크 - response.user_info에 role이 있음
+      const userRole = response.user_info?.role;
+      
+      if (!userRole || (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN')) {
+        setError('관리자 권한이 없습니다. 관리자 계정으로 로그인해주세요.');
+        setIsLoading(false);
+        return;
+      }
+      
       localStorage.setItem('access_token', response.access_token);
-      localStorage.setItem('user_info', JSON.stringify(response.user));
+      localStorage.setItem('user_info', JSON.stringify(response.user_info));
       onLogin();
     } catch (err: any) {
       setError(err.message || '로그인에 실패했습니다.');
@@ -3025,7 +3035,7 @@ const NewsCommentsModal: React.FC<{ newsId: string; newsTitle: string; onClose: 
     queryKey: ['news-comments', newsId, page, pageSize],
     queryFn: async () => {
       console.log('Fetching comments for news:', newsId);
-      const result = await api.getCommentsList(page, pageSize, undefined, undefined, newsId, 'news');
+      const result = await api.getCommentsList(page, pageSize, undefined, undefined, newsId, 'news', undefined, 'created_at_desc', false);
       console.log('Comments result:', result);
       
       // 만약 백엔드가 필터링을 제대로 하지 않는다면 프론트에서 필터링
@@ -4865,14 +4875,10 @@ const CalendarManagement: React.FC = () => {
     // 날짜와 시간을 합쳐서 event_date 설정
     const combinedDateTime = `${selectedDate}T${selectedTime}:00`; // 초 추가
     
-    // Validate HTML content
-    if (!htmlContent || htmlContent === '<p><br></p>' || htmlContent.trim() === '') {
-      alert('내용을 입력해주세요.');
-      return;
-    }
-
-    // Convert HTML to content blocks
-    const contentBlocks = convertHtmlToContentBlocks(htmlContent);
+    // Convert HTML to content blocks - 빈 내용도 허용
+    const contentBlocks = (!htmlContent || htmlContent === '<p><br></p>' || htmlContent.trim() === '') 
+      ? [] 
+      : convertHtmlToContentBlocks(htmlContent);
 
     // 문제 분석:
     // - 사용자가 18시 입력 → 서버에 09시로 저장됨 → 표시할 때 09시로 나옴
@@ -6639,7 +6645,7 @@ const CommunityCommentsModal: React.FC<{ postId: string; postTitle: string; onCl
     queryKey: ['community-comments', postId, page, pageSize],
     queryFn: async () => {
       console.log('Fetching comments for community post:', postId);
-      const result = await api.getCommentsList(page, pageSize, undefined, undefined, postId, 'community');
+      const result = await api.getCommentsList(page, pageSize, undefined, undefined, postId, 'community', undefined, 'created_at_desc', false);
       console.log('Community comments result:', result);
       
       // 만약 백엔드가 필터링을 제대로 하지 않는다면 프론트에서 필터링
@@ -7634,7 +7640,7 @@ const StatisticsManagement: React.FC = () => {
 };
 
 // Mobile Navigation Component
-type TabType = 'statistics' | 'news' | 'report' | 'user' | 'calendar' | 'community' | 'tags' | 'terms' | 'reports' | 'comments';
+type TabType = 'statistics' | 'news' | 'report' | 'user' | 'calendar' | 'community' | 'tags' | 'terms' | 'reports' | 'comments' | 'deleted';
 
 const MobileNav: React.FC<{ activeTab: TabType; setActiveTab: (tab: TabType) => void }> = ({ activeTab, setActiveTab }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -7650,6 +7656,7 @@ const MobileNav: React.FC<{ activeTab: TabType; setActiveTab: (tab: TabType) => 
     { id: 'tags' as TabType, label: '태그 관리', icon: '' },
     { id: 'terms' as TabType, label: '약관 설정', icon: '' },
     { id: 'reports' as TabType, label: '신고 관리', icon: '' },
+    { id: 'deleted' as TabType, label: '삭제 목록', icon: '🗑️' },
   ];
 
   const hamburgerStyle = {
@@ -8817,7 +8824,8 @@ const CommentsManagement: React.FC = () => {
         undefined,  // targetId
         targetTypeFilter !== 'all' ? targetTypeFilter : undefined,
         deletedFilter === 'deleted' ? true : deletedFilter === 'active' ? false : undefined,
-        sortBy
+        sortBy,
+        deletedFilter === 'all' || deletedFilter === 'deleted' // includeDeleted: true when showing all or deleted
       );
       
       // API 응답 정규화
@@ -9456,7 +9464,7 @@ const AuthorDetailContent: React.FC<{ authorId: string; authorName: string }> = 
     queryKey: ['userComments', authorId, commentsPage],
     queryFn: async () => {
       // getCommentsList(page, pageSize, search, authorSearch, targetId, targetType, isDeleted, sort)
-      return await api.getCommentsList(commentsPage, 5, undefined, authorId, undefined, undefined, undefined, 'created_at_desc');
+      return await api.getCommentsList(commentsPage, 5, undefined, authorId, undefined, undefined, undefined, 'created_at_desc', false);
     },
   });
 
@@ -9929,11 +9937,437 @@ const AuthorDetailContent: React.FC<{ authorId: string; authorName: string }> = 
   );
 };
 
+// Deleted Items Management Component
+const DeletedItemsManagement: React.FC = () => {
+  const [activeSubTab, setActiveSubTab] = useState<'news' | 'users' | 'community' | 'comments'>('news');
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const queryClient = useQueryClient();
+
+  // API 호출 쿼리들
+  // 주의: include_deleted=true는 삭제된 것을 "포함"하는 것이지 "삭제된 것만" 보는 게 아님
+  // 백엔드에 is_deleted=true 또는 deleted_only=true 파라미터가 필요할 수 있음
+  const newsQuery = useQuery({
+    queryKey: ['deletedNews', page, searchQuery],
+    queryFn: async () => {
+      // include_deleted=true로 모든 항목을 가져온 후 프론트에서 필터링
+      const data = await api.getNews(searchQuery, page, 20, 'created_at_desc', true);
+      console.log('News API Response:', data);
+      return data;
+    },
+    enabled: activeSubTab === 'news',
+  });
+
+  const usersQuery = useQuery({
+    queryKey: ['deletedUsers', page, searchQuery],
+    queryFn: async () => {
+      const data = await api.getUserList(page, 20, searchQuery, undefined, undefined, 'created_at_desc', true);
+      console.log('Users API Response:', data);
+      return data;
+    },
+    enabled: activeSubTab === 'users',
+  });
+
+  const communityQuery = useQuery({
+    queryKey: ['deletedCommunity', page, searchQuery],
+    queryFn: async () => {
+      const data = await api.getCommunityPosts(page, 20, searchQuery, undefined, undefined, 'created_at_desc', true);
+      console.log('Community API Response:', data);
+      return data;
+    },
+    enabled: activeSubTab === 'community',
+  });
+
+  const commentsQuery = useQuery({
+    queryKey: ['deletedComments', page, searchQuery],
+    queryFn: async () => {
+      // 댓글은 is_deleted 파라미터를 true로 설정
+      const data = await api.getCommentsList(page, 20, searchQuery, undefined, undefined, undefined, true, 'created_at_desc', true);
+      console.log('Comments API Response:', data);
+      // 개별 댓글 데이터 구조 확인
+      if (data?.comments && data.comments.length > 0) {
+        console.log('First comment structure:', data.comments[0]);
+      }
+      return data;
+    },
+    enabled: activeSubTab === 'comments',
+  });
+
+  const handleSearch = () => {
+    setSearchQuery(searchInput);
+    setPage(1);
+  };
+
+
+  const renderNewsTab = () => {
+    const data = newsQuery.data;
+    const isLoading = newsQuery.isLoading;
+    // include_deleted=true로 받은 데이터가 이미 삭제된 것들일 수 있음
+    const allNews = data?.news_list || [];
+    // is_deleted 필드가 없으면 모든 항목이 삭제된 것으로 간주
+    const filteredNews = allNews;
+
+    return (
+      <div>
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: colors.gray[500] }}>
+            데이터를 불러오는 중...
+          </div>
+        ) : filteredNews.length > 0 ? (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={styles.table}>
+              <thead>
+                <tr style={styles.tableHeader}>
+                  <th style={styles.tableHeader}>제목</th>
+                  <th style={styles.tableHeader}>카테고리</th>
+                  <th style={styles.tableHeader}>작성자</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredNews.map((news: any) => (
+                  <tr key={news.id} style={styles.tableRow}>
+                    <td style={styles.tableCell}>{news.title}</td>
+                    <td style={styles.tableCell}>{news.category || '-'}</td>
+                    <td style={styles.tableCell}>{news.author_name || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px', color: colors.gray[500] }}>
+            <div>삭제된 뉴스가 없습니다.</div>
+            <div style={{ fontSize: '12px', marginTop: '8px', color: colors.gray[400] }}>
+              전체 {allNews.length}개 중 삭제된 항목: {filteredNews.length}개
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderUsersTab = () => {
+    const data = usersQuery.data;
+    const isLoading = usersQuery.isLoading;
+    // include_deleted=true로 받은 데이터
+    const allUsers = data?.users || [];
+    const filteredUsers = allUsers;
+
+    return (
+      <div>
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: colors.gray[500] }}>
+            데이터를 불러오는 중...
+          </div>
+        ) : filteredUsers.length > 0 ? (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={styles.table}>
+              <thead>
+                <tr style={styles.tableHeader}>
+                  <th style={styles.tableHeader}>이름</th>
+                  <th style={styles.tableHeader}>이메일</th>
+                  <th style={styles.tableHeader}>역할</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map((user: any) => (
+                  <tr key={user.id} style={styles.tableRow}>
+                    <td style={styles.tableCell}>{user.username || '-'}</td>
+                    <td style={styles.tableCell}>{user.email || '-'}</td>
+                    <td style={styles.tableCell}>{user.role || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px', color: colors.gray[500] }}>
+            <div>삭제된 회원이 없습니다.</div>
+            <div style={{ fontSize: '12px', marginTop: '8px', color: colors.gray[400] }}>
+              전체 {allUsers.length}개 중 삭제된 항목: {filteredUsers.length}개
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderCommunityTab = () => {
+    const data = communityQuery.data;
+    const isLoading = communityQuery.isLoading;
+    // include_deleted=true로 받은 데이터
+    const allPosts = data?.posts || [];
+    const filteredPosts = allPosts;
+
+    return (
+      <div>
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: colors.gray[500] }}>
+            데이터를 불러오는 중...
+          </div>
+        ) : filteredPosts.length > 0 ? (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={styles.table}>
+              <thead>
+                <tr style={styles.tableHeader}>
+                  <th style={styles.tableHeader}>제목</th>
+                  <th style={styles.tableHeader}>카테고리</th>
+                  <th style={styles.tableHeader}>작성자</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPosts.map((post: any) => (
+                  <tr key={post.id} style={styles.tableRow}>
+                    <td style={styles.tableCell}>{post.title}</td>
+                    <td style={styles.tableCell}>{post.category || '-'}</td>
+                    <td style={styles.tableCell}>{post.author_name || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px', color: colors.gray[500] }}>
+            <div>삭제된 커뮤니티 게시글이 없습니다.</div>
+            <div style={{ fontSize: '12px', marginTop: '8px', color: colors.gray[400] }}>
+              전체 {allPosts.length}개 중 삭제된 항목: {filteredPosts.length}개
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderCommentsTab = () => {
+    const data = commentsQuery.data;
+    const isLoading = commentsQuery.isLoading;
+    const allComments: any[] = Array.isArray(data?.comments) ? (data?.comments || []) : [];
+    // 댓글은 is_deleted=true 파라미터로 삭제된 것만 가져옴
+    const filteredComments: any[] = allComments;
+
+    return (
+      <div>
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: colors.gray[500] }}>
+            데이터를 불러오는 중...
+          </div>
+        ) : filteredComments.length > 0 ? (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={styles.table}>
+              <thead>
+                <tr style={styles.tableHeader}>
+                  <th style={styles.tableHeader}>내용</th>
+                  <th style={styles.tableHeader}>타입</th>
+                  <th style={styles.tableHeader}>작성자</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredComments.map((comment: any) => (
+                  <tr key={comment.id} style={styles.tableRow}>
+                    <td style={styles.tableCell}>
+                      <div style={{ 
+                        maxWidth: '400px', 
+                        overflow: 'hidden', 
+                        textOverflow: 'ellipsis', 
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                      }}>
+                        {(() => {
+                          // 댓글 내용 처리 - 다양한 형식 지원
+                          if (typeof comment.content === 'string' && comment.content.trim()) {
+                            return comment.content;
+                          } else if (Array.isArray(comment.content)) {
+                            // content가 배열인 경우 (rich text)
+                            const textContent = comment.content
+                              .map((item: any) => {
+                                if (typeof item === 'string') return item;
+                                if (item.type === 'text') return item.content;
+                                return '';
+                              })
+                              .filter(Boolean)
+                              .join(' ');
+                            return textContent || '내용 없음';
+                          } else if (comment.comment_text) {
+                            return comment.comment_text;
+                          } else if (comment.text) {
+                            return comment.text;
+                          } else {
+                            return '내용 없음';
+                          }
+                        })()}
+                      </div>
+                    </td>
+                    <td style={styles.tableCell}>
+                      <span style={{
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        backgroundColor: comment.target_type === 'news' ? colors.blue[100] : colors.green[100],
+                        color: comment.target_type === 'news' ? colors.blue[600] : colors.green[600],
+                      }}>
+                        {comment.target_type === 'news' ? '뉴스' : '커뮤니티'}
+                      </span>
+                    </td>
+                    <td style={styles.tableCell}>{comment.author_name || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px', color: colors.gray[500] }}>
+            <div>삭제된 댓글이 없습니다.</div>
+            <div style={{ fontSize: '12px', marginTop: '8px', color: colors.gray[400] }}>
+              전체 {allComments.length}개 중 삭제된 항목: {filteredComments.length}개
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', color: colors.gray[800] }}>
+        삭제된 항목 관리
+      </h1>
+
+      {/* 서브 탭 */}
+      <div style={{ 
+        display: 'flex', 
+        gap: '8px', 
+        marginBottom: '20px',
+        borderBottom: `2px solid ${colors.gray[200]}`,
+      }}>
+        {[
+          { id: 'news' as const, label: '뉴스' },
+          // { id: 'users' as const, label: '회원' },
+          { id: 'community' as const, label: '커뮤니티' },
+          { id: 'comments' as const, label: '댓글' },
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => {
+              setActiveSubTab(tab.id);
+              setPage(1);
+              setSearchQuery('');
+              setSearchInput('');
+            }}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderBottom: activeSubTab === tab.id ? `2px solid ${colors.primary}` : '2px solid transparent',
+              color: activeSubTab === tab.id ? colors.primary : colors.gray[600],
+              fontWeight: activeSubTab === tab.id ? '600' : '400',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 검색 바 */}
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '8px' }}>
+        <input
+          type="text"
+          placeholder="검색..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+          style={{
+            flex: 1,
+            padding: '8px 12px',
+            border: `1px solid ${colors.gray[300]}`,
+            borderRadius: '6px',
+            fontSize: '14px',
+          }}
+        />
+        <button
+          onClick={handleSearch}
+          style={{
+            padding: '8px 24px',
+            backgroundColor: colors.primary,
+            color: colors.white,
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+          }}
+        >
+          검색
+        </button>
+      </div>
+
+      {/* 콘텐츠 영역 */}
+      <div style={{ backgroundColor: colors.white, borderRadius: '8px', padding: '20px' }}>
+        {activeSubTab === 'news' && renderNewsTab()}
+        {/* {activeSubTab === 'users' && renderUsersTab()} */}
+        {activeSubTab === 'community' && renderCommunityTab()}
+        {activeSubTab === 'comments' && renderCommentsTab()}
+      </div>
+
+      {/* 페이지네이션 */}
+      {((activeSubTab === 'news' && newsQuery.data?.total_pages > 1) ||
+        // (activeSubTab === 'users' && usersQuery.data?.total_pages > 1) ||
+        (activeSubTab === 'community' && communityQuery.data?.total_pages > 1) ||
+        (activeSubTab === 'comments' && (commentsQuery.data as any)?.total_pages > 1)) && (
+        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '8px' }}>
+          <button
+            onClick={() => setPage(prev => Math.max(1, prev - 1))}
+            disabled={page === 1}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: page === 1 ? colors.gray[100] : colors.white,
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '4px',
+              cursor: page === 1 ? 'not-allowed' : 'pointer',
+              color: page === 1 ? colors.gray[400] : colors.gray[700],
+            }}
+          >
+            이전
+          </button>
+          <span style={{ padding: '8px 16px', color: colors.gray[700] }}>
+            페이지 {page}
+          </span>
+          <button
+            onClick={() => setPage(prev => prev + 1)}
+            disabled={
+              (activeSubTab === 'news' && page >= (newsQuery.data?.total_pages || 1)) ||
+              // (activeSubTab === 'users' && page >= (usersQuery.data?.total_pages || 1)) ||
+              (activeSubTab === 'community' && page >= (communityQuery.data?.total_pages || 1)) ||
+              (activeSubTab === 'comments' && page >= ((commentsQuery.data as any)?.total_pages || 1))
+            }
+            style={{
+              padding: '8px 16px',
+              backgroundColor: colors.white,
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: '4px',
+              cursor: 'pointer',
+              color: colors.gray[700],
+            }}
+          >
+            다음
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Main Admin Component
 const AdminApp: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('statistics');
   const [hoveredNavItem, setHoveredNavItem] = useState<string | null>(null);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -9941,6 +10375,24 @@ const AdminApp: React.FC = () => {
       setIsLoggedIn(true);
     }
   }, []);
+
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('[data-user-dropdown]')) {
+        setUserDropdownOpen(false);
+      }
+    };
+
+    if (userDropdownOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [userDropdownOpen]);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
@@ -9978,6 +10430,8 @@ const AdminApp: React.FC = () => {
         return <UserReportsManagement />;
       case 'comments':
         return <CommentsManagement />;
+      case 'deleted':
+        return <DeletedItemsManagement />;
       default:
         return <StatisticsManagement />;
     }
@@ -10123,15 +10577,132 @@ const AdminApp: React.FC = () => {
               >
                 신고 관리
               </button>
+              <button
+                style={{
+                  ...styles.navItem,
+                  ...(activeTab === 'deleted' ? styles.navItemActive : {}),
+                  ...(hoveredNavItem === 'deleted' && activeTab !== 'deleted' ? styles.navItemHover : {}),
+                }}
+                onClick={() => setActiveTab('deleted')}
+                onMouseEnter={() => setHoveredNavItem('deleted')}
+                onMouseLeave={() => setHoveredNavItem(null)}
+              >
+                삭제 목록
+              </button>
             </nav>
             
-            <div style={styles.userSection}>
-              <span style={styles.userName} className="desktop-only">
-                {userInfo.name || userInfo.email || 'Admin'}
-              </span>
-              <button style={styles.logoutButton} onClick={handleLogout}>
-                로그아웃
+            <div style={{ position: 'relative', marginLeft: 'auto' }} data-user-dropdown>
+              <button
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 12px',
+                  backgroundColor: 'transparent',
+                  border: `1px solid ${colors.gray[300]}`,
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  color: colors.gray[700],
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.gray[50];
+                  e.currentTarget.style.borderColor = colors.gray[400];
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = colors.gray[300];
+                }}
+              >
+                <span style={{ 
+                  maxWidth: '150px', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {userInfo.email || 'Admin'}
+                </span>
+                <span style={{ 
+                  fontSize: '12px',
+                  transform: userDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s',
+                }}>
+                  ▼
+                </span>
               </button>
+              
+              {userDropdownOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '4px',
+                  minWidth: '200px',
+                  backgroundColor: colors.white,
+                  border: `1px solid ${colors.gray[200]}`,
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  zIndex: 1000,
+                }}>
+                  <div style={{
+                    padding: '12px 16px',
+                    borderBottom: `1px solid ${colors.gray[200]}`,
+                  }}>
+                    <div style={{ 
+                      fontSize: '12px', 
+                      color: colors.gray[500],
+                      marginBottom: '4px',
+                    }}>
+                      로그인 계정
+                    </div>
+                    <div style={{ 
+                      fontSize: '14px', 
+                      fontWeight: '500',
+                      color: colors.gray[800],
+                      wordBreak: 'break-all',
+                    }}>
+                      {userInfo.email || 'Admin'}
+                    </div>
+                    {userInfo.name && (
+                      <div style={{ 
+                        fontSize: '13px', 
+                        color: colors.gray[600],
+                        marginTop: '4px',
+                      }}>
+                        {userInfo.name}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      handleLogout();
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      borderRadius: '0 0 8px 8px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      color: colors.error,
+                      textAlign: 'left',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = colors.red[50];
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    로그아웃
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
