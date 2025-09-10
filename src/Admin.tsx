@@ -628,7 +628,7 @@ const styles = {
   },
   detailGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
     gap: '16px',
   },
   detailItem: {
@@ -3928,6 +3928,8 @@ const UserManagement: React.FC = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [showActivityModal, setShowActivityModal] = useState(false);
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [editUsername, setEditUsername] = useState('');
   const [statusFormData, setStatusFormData] = useState<api.UserStatusUpdate>({
     is_banned: false,
     role: 'USER',
@@ -3966,6 +3968,21 @@ const UserManagement: React.FC = () => {
     },
   });
 
+  // 회원 정보 업데이트
+  const userInfoMutation = useMutation({
+    mutationFn: ({ userId, data }: { userId: string; data: any }) => 
+      api.updateUserInfo(userId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['userDetail'] });
+      setIsEditingUsername(false);
+      alert('회원 정보가 업데이트되었습니다.');
+    },
+    onError: (error: any) => {
+      alert(error.message || '회원 정보 업데이트에 실패했습니다.');
+    },
+  });
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setSearchQuery(searchInput);
@@ -3975,6 +3992,7 @@ const UserManagement: React.FC = () => {
   const handleViewDetail = (user: any) => {
     setSelectedUser(user);
     setShowDetailModal(true);
+    setIsEditingUsername(false);
   };
 
   const handleEditStatus = (user: any) => {
@@ -3992,6 +4010,25 @@ const UserManagement: React.FC = () => {
     if (selectedUser) {
       statusMutation.mutate({ userId: selectedUser.id, data: statusFormData });
     }
+  };
+
+  const handleEditUsername = () => {
+    setIsEditingUsername(true);
+    setEditUsername(userDetail?.user_info?.username || userDetail?.user_info?.name || '');
+  };
+
+  const handleSaveUsername = () => {
+    if (selectedUser && editUsername.trim()) {
+      userInfoMutation.mutate({ 
+        userId: selectedUser.id, 
+        data: { username: editUsername.trim() } 
+      });
+    }
+  };
+
+  const handleCancelEditUsername = () => {
+    setIsEditingUsername(false);
+    setEditUsername('');
   };
 
   const totalPages = Math.ceil((data?.total_count || 0) / pageSize);
@@ -4353,7 +4390,104 @@ const UserManagement: React.FC = () => {
                       </div>
                       <div style={styles.detailItem}>
                         <span style={styles.detailLabel}>이름</span>
-                        <span style={styles.detailValue}>{userDetail.user_info.username || userDetail.user_info.name}</span>
+                        {isEditingUsername ? (
+                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '2px' }}>
+                            <input
+                              type="text"
+                              value={editUsername}
+                              onChange={(e) => setEditUsername(e.target.value)}
+                              style={{
+                                padding: '5px 8px',
+                                border: `1px solid ${colors.blue[500]}`,
+                                borderRadius: '4px',
+                                fontSize: '14px',
+                                minWidth: '120px',
+                                maxWidth: '200px',
+                                outline: 'none',
+                                backgroundColor: colors.white,
+                                boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.1)',
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleSaveUsername();
+                                } else if (e.key === 'Escape') {
+                                  handleCancelEditUsername();
+                                }
+                              }}
+                              autoFocus
+                            />
+                            <button
+                              onClick={handleSaveUsername}
+                              disabled={userInfoMutation.isPending}
+                              style={{
+                                padding: '5px 10px',
+                                backgroundColor: colors.blue[600],
+                                color: colors.white,
+                                border: 'none',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                fontWeight: '500',
+                                cursor: userInfoMutation.isPending ? 'not-allowed' : 'pointer',
+                                opacity: userInfoMutation.isPending ? 0.6 : 1,
+                                transition: 'all 0.2s',
+                              }}
+                            >
+                              {userInfoMutation.isPending ? '저장중' : '저장'}
+                            </button>
+                            <button
+                              onClick={handleCancelEditUsername}
+                              style={{
+                                padding: '5px 10px',
+                                backgroundColor: colors.gray[100],
+                                color: colors.gray[600],
+                                border: `1px solid ${colors.gray[300]}`,
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                              }}
+                            >
+                              취소
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={styles.detailValue}>{userDetail.user_info.username || userDetail.user_info.name}</span>
+                            <button
+                              onClick={handleEditUsername}
+                              style={{
+                                padding: '3px 8px',
+                                backgroundColor: 'transparent',
+                                color: colors.blue[600],
+                                border: `1px solid ${colors.blue[200]}`,
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = colors.blue[50];
+                                e.currentTarget.style.borderColor = colors.blue[500];
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.borderColor = colors.blue[200];
+                              }}
+                              title="이름 수정"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                              </svg>
+                              수정
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <div style={styles.detailItem}>
                         <span style={styles.detailLabel}>이메일</span>
@@ -7646,7 +7780,6 @@ const MobileNav: React.FC<{ activeTab: TabType; setActiveTab: (tab: TabType) => 
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { id: 'statistics' as TabType, label: '통계', icon: '' },
     { id: 'news' as TabType, label: '뉴스 관리', icon: '' },
     { id: 'report' as TabType, label: '리포트 관리', icon: '' },
     { id: 'user' as TabType, label: '회원 관리', icon: '' },
@@ -7657,6 +7790,7 @@ const MobileNav: React.FC<{ activeTab: TabType; setActiveTab: (tab: TabType) => 
     { id: 'terms' as TabType, label: '약관 설정', icon: '' },
     { id: 'reports' as TabType, label: '신고 관리', icon: '' },
     { id: 'deleted' as TabType, label: '삭제 목록', icon: '🗑️' },
+    { id: 'statistics' as TabType, label: '통계', icon: '' },
   ];
 
   const hamburgerStyle = {
@@ -10365,7 +10499,7 @@ const DeletedItemsManagement: React.FC = () => {
 // Main Admin Component
 const AdminApp: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('statistics');
+  const [activeTab, setActiveTab] = useState<TabType>('news');
   const [hoveredNavItem, setHoveredNavItem] = useState<string | null>(null);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
@@ -10457,18 +10591,6 @@ const AdminApp: React.FC = () => {
             </div>
             
             <nav style={styles.nav} className="desktop-only">
-              <button
-                style={{
-                  ...styles.navItem,
-                  ...(activeTab === 'statistics' ? styles.navItemActive : {}),
-                  ...(hoveredNavItem === 'statistics' && activeTab !== 'statistics' ? styles.navItemHover : {}),
-                }}
-                onClick={() => setActiveTab('statistics')}
-                onMouseEnter={() => setHoveredNavItem('statistics')}
-                onMouseLeave={() => setHoveredNavItem(null)}
-              >
-                통계
-              </button>
               <button
                 style={{
                   ...styles.navItem,
@@ -10588,6 +10710,18 @@ const AdminApp: React.FC = () => {
                 onMouseLeave={() => setHoveredNavItem(null)}
               >
                 삭제 목록
+              </button>
+              <button
+                style={{
+                  ...styles.navItem,
+                  ...(activeTab === 'statistics' ? styles.navItemActive : {}),
+                  ...(hoveredNavItem === 'statistics' && activeTab !== 'statistics' ? styles.navItemHover : {}),
+                }}
+                onClick={() => setActiveTab('statistics')}
+                onMouseEnter={() => setHoveredNavItem('statistics')}
+                onMouseLeave={() => setHoveredNavItem(null)}
+              >
+                통계
               </button>
             </nav>
             

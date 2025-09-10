@@ -222,6 +222,13 @@ export const updateUserStatus = async (userId: string, statusData: UserStatusUpd
   });
 };
 
+export const updateUserInfo = async (userId: string, userData: any) => {
+  return apiCall(`/admin-api/user/update/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify(userData),
+  });
+};
+
 // Legacy user APIs (keep for backward compatibility)
 export const getUsers = async (page: number = 1, pageSize: number = 20) => {
   return getUserList(page, pageSize);
