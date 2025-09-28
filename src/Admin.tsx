@@ -7258,6 +7258,653 @@ const CalendarManagement: React.FC = () => {
   );
 };
 
+// Customer Support Management Component
+const CustomerSupportManagement: React.FC = () => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [detailModalData, setDetailModalData] = useState<{
+    postId: string;
+    title: string;
+  } | null>(null);
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState("");
+
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["customer-support", page, pageSize, searchQuery, selectedTag],
+    queryFn: () => {
+      return api.getCommunityPosts(
+        page,
+        pageSize,
+        searchQuery || undefined,
+        "suggestion",
+        undefined,
+      );
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: api.deleteCommunityPost,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["customer-support"] });
+      await queryClient.refetchQueries({
+        queryKey: ["customer-support", page, searchQuery, selectedTag],
+      });
+      alert("문의글이 성공적으로 삭제되었습니다.");
+    },
+    onError: (error: any) => {
+      alert(error.message || "문의글 삭제에 실패했습니다.");
+    },
+  });
+
+  const handleDelete = (id: string) => {
+    if (window.confirm("정말 삭제하시겠습니까?")) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const totalPages = Math.ceil((data?.total_count || 0) / pageSize);
+
+  if (isLoading) return <LoadingSpinner />;
+  if (error)
+    return (
+      <div style={styles.errorContainer}>데이터를 불러오는데 실패했습니다.</div>
+    );
+
+  return (
+    <div>
+      <div style={styles.pageHeader}>
+        <h1 style={styles.pageTitle}>고객센터</h1>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginLeft: "auto",
+            }}
+          >
+            <span style={{ fontSize: "14px", color: colors.gray[600] }}>
+              페이지당
+            </span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              style={{
+                padding: "10px 12px",
+                fontSize: "14px",
+                border: `1px solid ${colors.gray[300]}`,
+                borderRadius: "8px",
+                backgroundColor: colors.white,
+                cursor: "pointer",
+                outline: "none",
+              }}
+            >
+              <option value="10">10개</option>
+              <option value="20">20개</option>
+              <option value="50">50개</option>
+              <option value="100">100개</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginBottom: "20px",
+          display: "flex",
+          gap: "12px",
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
+        <input
+          type="text"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              setSearchQuery(searchInput);
+              setPage(1);
+            }
+          }}
+          placeholder="검색어 입력"
+          style={{
+            ...styles.input,
+            width: "250px",
+            padding: "10px 12px",
+            fontSize: "14px",
+            border: `1px solid ${colors.gray[300]}`,
+            borderRadius: "8px",
+          }}
+        />
+        <select
+          value={selectedTag}
+          onChange={(e) => {
+            setSelectedTag(e.target.value);
+            setPage(1);
+          }}
+          style={{
+            ...styles.input,
+            width: "180px",
+            padding: "10px 12px",
+            fontSize: "14px",
+            border: `1px solid ${colors.gray[300]}`,
+            borderRadius: "8px",
+            cursor: "pointer",
+          }}
+        >
+          <option value="">모든 태그</option>
+          <option value="건의">건의</option>
+          <option value="질문">질문</option>
+        </select>
+        <button
+          onClick={() => {
+            setSearchQuery(searchInput);
+            setPage(1);
+          }}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: colors.primary,
+            color: colors.white,
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "14px",
+            fontWeight: "500",
+            cursor: "pointer",
+          }}
+        >
+          검색
+        </button>
+        <button
+          onClick={() => {
+            setSearchInput("");
+            setSearchQuery("");
+            setSelectedTag("");
+            setPage(1);
+          }}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: colors.gray[200],
+            color: colors.gray[700],
+            border: `1px solid ${colors.gray[300]}`,
+            borderRadius: "8px",
+            fontSize: "14px",
+            cursor: "pointer",
+          }}
+        >
+          초기화
+        </button>
+      </div>
+
+      <div style={styles.tableContainer}>
+        {!data?.posts || data.posts.length === 0 ? (
+          <EmptyState message="등록된 문의글이 없습니다." icon="💬" />
+        ) : (
+          <>
+            <div style={styles.tableWrapper}>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={styles.th}>제목</th>
+                    <th style={styles.th}>작성자</th>
+                    <th style={styles.th}>태그</th>
+                    <th style={styles.th}>작성일</th>
+                    <th style={styles.th}>조회수</th>
+                    <th style={styles.th}>댓글</th>
+                    <th style={styles.th}>액션</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.posts.map((post: any) => (
+                    <tr
+                      key={post.id}
+                      style={{
+                        ...styles.tableRow,
+                        ...(hoveredRow === post.id ? styles.tableRowHover : {}),
+                      }}
+                      onMouseEnter={() => setHoveredRow(post.id)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                    >
+                      <td style={styles.td}>
+                        <div
+                          style={{
+                            maxWidth: "300px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {post.title}
+                        </div>
+                      </td>
+                      <td style={styles.td}>{post.author_name}</td>
+                      <td style={styles.td}>
+                        {post.community_tags && post.community_tags.length > 0 ? (
+                          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                            {post.community_tags.map((tag: string, idx: number) => (
+                              <span
+                                key={idx}
+                                style={{
+                                  padding: "4px 10px",
+                                  borderRadius: "6px",
+                                  fontSize: "12px",
+                                  fontWeight: "500",
+                                  backgroundColor:
+                                    tag === "건의"
+                                      ? "#E0E7FF"
+                                      : tag === "질문"
+                                      ? "#FEE2E2"
+                                      : "#F3F4F6",
+                                  color:
+                                    tag === "건의"
+                                      ? "#6366F1"
+                                      : tag === "질문"
+                                      ? "#EF4444"
+                                      : "#6B7280",
+                                }}
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td style={styles.td}>
+                        {new Date(post.created_at).toLocaleDateString()}
+                      </td>
+                      <td style={styles.td}>
+                        {post.view_count.toLocaleString()}
+                      </td>
+                      <td style={styles.td}>{post.comment_count}</td>
+                      <td style={styles.td}>
+                        <div style={styles.actionButtons}>
+                          <button
+                            style={{
+                              ...styles.actionButton,
+                              backgroundColor: colors.blue[600],
+                            }}
+                            onClick={() =>
+                              setDetailModalData({
+                                postId: post.id,
+                                title: post.title,
+                              })
+                            }
+                          >
+                            내용 보기
+                          </button>
+                          <button
+                            style={{
+                              ...styles.actionButton,
+                              ...styles.deleteButton,
+                            }}
+                            onClick={() => handleDelete(post.id)}
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          </>
+        )}
+      </div>
+
+      {detailModalData && (
+        <CustomerSupportDetailModal
+          postId={detailModalData.postId}
+          postTitle={detailModalData.title}
+          onClose={() => setDetailModalData(null)}
+        />
+      )}
+    </div>
+  );
+};
+
+// Customer Support Detail Modal Component
+const CustomerSupportDetailModal: React.FC<{
+  postId: string;
+  postTitle: string;
+  onClose: () => void;
+}> = ({ postId, postTitle, onClose }) => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [replyContent, setReplyContent] = useState("");
+  const queryClient = useQueryClient();
+
+  const { data: postDetail, isLoading: postLoading, error: postError } = useQuery({
+    queryKey: ["customer-support-detail", postId],
+    queryFn: async () => {
+      const result = await api.getCommunityDetail(postId);
+      return result.post;
+    },
+  });
+
+  const { data: commentsData, isLoading: commentsLoading, error: commentsError } = useQuery({
+    queryKey: ["customer-support-comments", postId, page, pageSize],
+    queryFn: async () => {
+      console.log("Fetching comments for post:", postId);
+      const result = await api.apiCall(`/api/comments/list/${postId}?sort=created_at_asc`);
+      console.log("Comments result:", result);
+      return result;
+    },
+  });
+
+  const createCommentMutation = useMutation({
+    mutationFn: async (content: string) => {
+      return api.apiCall('/api/comments/create', {
+        method: 'POST',
+        body: JSON.stringify({
+          target_id: postId,
+          content: [{ type: 'text', content: content }],
+        }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customer-support-comments"] });
+      queryClient.invalidateQueries({ queryKey: ["customer-support"] });
+      setReplyContent("");
+      alert("답변이 등록되었습니다.");
+    },
+    onError: (error: any) => {
+      alert(`답변 등록 실패: ${error.message || "알 수 없는 오류가 발생했습니다."}`);
+    },
+  });
+
+  const deleteCommentMutation = useMutation({
+    mutationFn: api.deleteComment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customer-support-comments"] });
+      queryClient.invalidateQueries({ queryKey: ["customer-support"] });
+      alert("댓글이 삭제되었습니다.");
+    },
+    onError: (error: any) => {
+      alert(`삭제 실패: ${error.message || "알 수 없는 오류가 발생했습니다."}`);
+    },
+  });
+
+  const handleReplySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyContent.trim()) {
+      alert("답변 내용을 입력해주세요.");
+      return;
+    }
+    createCommentMutation.mutate(replyContent);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const renderContent = (content: any) => {
+    if (typeof content === 'string') {
+      return <p>{content}</p>;
+    }
+    if (Array.isArray(content)) {
+      return content.map((block: any, index: number) => {
+        if (block.type === 'text') {
+          return <p key={index} style={{ marginBottom: '8px' }}>{block.content}</p>;
+        } else if (block.type === 'image') {
+          return (
+            <img
+              key={index}
+              src={block.url}
+              alt={block.alt || ''}
+              style={{ maxWidth: '100%', marginBottom: '8px', borderRadius: '4px' }}
+            />
+          );
+        }
+        return null;
+      });
+    }
+    return null;
+  };
+
+  return (
+    <div style={styles.modal} onClick={onClose}>
+      <div
+        style={{ ...styles.modalContent, maxWidth: "900px", maxHeight: "90vh", overflow: "hidden", display: "flex", flexDirection: "column" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          style={{
+            ...styles.modalHeader,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexShrink: 0,
+          }}
+        >
+          <div>
+            <h2 style={{ ...styles.modalTitle, margin: 0 }}>문의 내용</h2>
+            <p
+              style={{
+                margin: "4px 0 0 0",
+                fontSize: "14px",
+                color: colors.gray[600],
+              }}
+            >
+              {postTitle}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              ...styles.modalCloseButton,
+              position: "relative",
+              top: "auto",
+              right: "auto",
+              width: "32px",
+              height: "32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        <div style={{ ...styles.modalBody, flex: 1, overflow: "auto" }}>
+          {postLoading ? (
+            <div style={styles.loadingMessage}>내용을 불러오는 중...</div>
+          ) : postError ? (
+            <div style={styles.errorMessage}>내용을 불러오는 중 오류가 발생했습니다.</div>
+          ) : (
+            <>
+              <div
+                style={{
+                  padding: "16px",
+                  backgroundColor: colors.gray[50],
+                  borderRadius: "8px",
+                  marginBottom: "24px",
+                  border: `1px solid ${colors.gray[200]}`,
+                }}
+              >
+                <div style={{ marginBottom: "12px", display: "flex", alignItems: "center", gap: "12px" }}>
+                  <span style={{ fontWeight: "600", color: colors.gray[800] }}>
+                    작성자: {postDetail?.author_name}
+                  </span>
+                  <span style={{ color: colors.gray[500], fontSize: "14px" }}>
+                    {postDetail?.created_at && formatDate(postDetail.created_at)}
+                  </span>
+                  {postDetail?.community_tags && postDetail.community_tags.length > 0 && (
+                    <div style={{ display: "flex", gap: "4px" }}>
+                      {postDetail.community_tags.map((tag: string, idx: number) => (
+                        <span
+                          key={idx}
+                          style={{
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                            fontWeight: "500",
+                            backgroundColor: tag === "건의" ? "#E0E7FF" : "#FEE2E2",
+                            color: tag === "건의" ? "#6366F1" : "#EF4444",
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div style={{ color: colors.gray[700], fontSize: "15px", lineHeight: "1.6" }}>
+                  {postDetail?.content && renderContent(postDetail.content)}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <h3 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "12px", color: colors.gray[800] }}>
+                  답변 ({commentsData?.total_count || 0})
+                </h3>
+
+                {commentsLoading ? (
+                  <div style={styles.loadingMessage}>답변을 불러오는 중...</div>
+                ) : commentsError ? (
+                  <div style={styles.errorMessage}>답변을 불러오는 중 오류가 발생했습니다.</div>
+                ) : (
+                  <div style={{ marginBottom: "16px" }}>
+                    {commentsData?.comments && Array.isArray(commentsData.comments) && commentsData.comments.length > 0 ? (
+                      commentsData.comments.map((comment: any, index: number) => (
+                        <div
+                          key={comment.id}
+                          style={{
+                            padding: "12px",
+                            marginBottom: index < commentsData.comments.length - 1 ? "8px" : "0",
+                            backgroundColor: comment.is_deleted ? colors.gray[100] : colors.white,
+                            borderRadius: "6px",
+                            border: `1px solid ${comment.is_deleted ? colors.gray[300] : colors.gray[200]}`,
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                                <span style={{ fontWeight: "600", fontSize: "14px", color: colors.gray[800] }}>
+                                  {comment.author_name}
+                                </span>
+                                <span style={{ color: colors.gray[500], fontSize: "12px" }}>
+                                  {formatDate(comment.created_at)}
+                                </span>
+                                {comment.is_deleted && (
+                                  <span
+                                    style={{
+                                      padding: "2px 6px",
+                                      backgroundColor: colors.gray[300],
+                                      color: colors.gray[700],
+                                      borderRadius: "3px",
+                                      fontSize: "11px",
+                                      fontWeight: "500",
+                                    }}
+                                  >
+                                    삭제됨
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ color: colors.gray[700], fontSize: "14px", lineHeight: "1.5" }}>
+                                {comment.content && renderContent(comment.content)}
+                              </div>
+                            </div>
+                            {!comment.is_deleted && (
+                              <button
+                                onClick={() => {
+                                  if (window.confirm("이 댓글을 삭제하시겠습니까?")) {
+                                    deleteCommentMutation.mutate(comment.id);
+                                  }
+                                }}
+                                style={{
+                                  padding: "6px 12px",
+                                  fontSize: "12px",
+                                  backgroundColor: colors.red[500],
+                                  color: colors.white,
+                                  border: "none",
+                                  borderRadius: "4px",
+                                  cursor: "pointer",
+                                  marginLeft: "12px",
+                                }}
+                              >
+                                삭제
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ padding: "20px", textAlign: "center", color: colors.gray[500] }}>
+                        아직 답변이 없습니다.
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <form onSubmit={handleReplySubmit}>
+                  <div style={{ marginTop: "16px" }}>
+                    <label style={{ ...styles.label, display: "block", marginBottom: "8px" }}>
+                      답변 작성
+                    </label>
+                    <textarea
+                      value={replyContent}
+                      onChange={(e) => setReplyContent(e.target.value)}
+                      placeholder="답변을 입력하세요..."
+                      style={{
+                        ...styles.input,
+                        minHeight: "100px",
+                        resize: "vertical",
+                        fontFamily: "inherit",
+                      }}
+                    />
+                  </div>
+                  <div style={{ marginTop: "12px", display: "flex", justifyContent: "flex-end" }}>
+                    <button
+                      type="submit"
+                      disabled={createCommentMutation.isPending || !replyContent.trim()}
+                      style={{
+                        padding: "10px 20px",
+                        backgroundColor: createCommentMutation.isPending || !replyContent.trim() ? colors.gray[300] : colors.primary,
+                        color: colors.white,
+                        border: "none",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        cursor: createCommentMutation.isPending || !replyContent.trim() ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {createCommentMutation.isPending ? "등록 중..." : "답변 등록"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Community Management Component
 const CommunityManagement: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -7278,6 +7925,7 @@ const CommunityManagement: React.FC = () => {
   const [searchInput, setSearchInput] = useState(""); // 검색 입력값
   const [searchQuery, setSearchQuery] = useState(""); // 실제 검색 쿼리
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [activeTab, setActiveTab] = useState<"posts" | "notice">("posts"); // 탭 상태 추가
 
   const queryClient = useQueryClient();
 
@@ -7294,14 +7942,18 @@ const CommunityManagement: React.FC = () => {
   }, [formData, htmlContent, isModalOpen, editingPost]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["community", page, pageSize, searchQuery, selectedCategory],
-    queryFn: () =>
-      api.getCommunityPosts(
+    queryKey: ["community", page, pageSize, searchQuery, selectedCategory, activeTab],
+    queryFn: () => {
+      // 공지사항 탭일 때는 notice 카테고리로 필터링
+      const category = activeTab === "notice" ? "notice" : selectedCategory || undefined;
+      return api.getCommunityPosts(
         page,
         pageSize,
         searchQuery || undefined,
-        selectedCategory || undefined,
-      ),
+        category,
+        undefined, // authorId
+      );
+    },
   });
 
   const createMutation = useMutation({
@@ -7310,14 +7962,14 @@ const CommunityManagement: React.FC = () => {
       // 모든 community 관련 쿼리 무효화 및 새로고침
       await queryClient.invalidateQueries({ queryKey: ["community"] });
       await queryClient.refetchQueries({
-        queryKey: ["community", page, searchQuery, selectedCategory],
+        queryKey: ["community", page, searchQuery, selectedCategory, activeTab],
       });
-      alert("게시글이 성공적으로 등록되었습니다.");
+      alert(activeTab === "notice" ? "공지사항이 성공적으로 등록되었습니다." : "게시글이 성공적으로 등록되었습니다.");
       localStorage.removeItem("communityFormDraft"); // 성공 시 임시 저장 삭제
       closeModal();
       setFormData({
         title: "",
-        category: "free_board",
+        category: activeTab === "notice" ? "notice" : "free_board",
         linked_news_id: "",
       });
       setHtmlContent("");
@@ -7334,14 +7986,14 @@ const CommunityManagement: React.FC = () => {
       // 모든 community 관련 쿼리 무효화 및 새로고침
       await queryClient.invalidateQueries({ queryKey: ["community"] });
       await queryClient.refetchQueries({
-        queryKey: ["community", page, searchQuery, selectedCategory],
+        queryKey: ["community", page, searchQuery, selectedCategory, activeTab],
       });
-      alert("게시글이 성공적으로 수정되었습니다.");
+      alert(activeTab === "notice" ? "공지사항이 성공적으로 수정되었습니다." : "게시글이 성공적으로 수정되었습니다.");
       localStorage.removeItem("communityFormDraft"); // 성공 시 임시 저장 삭제
       closeModal();
       setFormData({
         title: "",
-        category: "free_board",
+        category: activeTab === "notice" ? "notice" : "free_board",
         linked_news_id: "",
       });
       setHtmlContent("");
@@ -7357,9 +8009,9 @@ const CommunityManagement: React.FC = () => {
       // 모든 community 관련 쿼리 무효화 및 새로고침
       await queryClient.invalidateQueries({ queryKey: ["community"] });
       await queryClient.refetchQueries({
-        queryKey: ["community", page, searchQuery, selectedCategory],
+        queryKey: ["community", page, searchQuery, selectedCategory, activeTab],
       });
-      alert("게시글이 성공적으로 삭제되었습니다.");
+      alert(activeTab === "notice" ? "공지사항이 성공적으로 삭제되었습니다." : "게시글이 성공적으로 삭제되었습니다.");
     },
     onError: (error: any) => {
       alert(error.message || "게시글 삭제에 실패했습니다.");
@@ -7421,7 +8073,7 @@ const CommunityManagement: React.FC = () => {
               setFormData(
                 draft.formData || {
                   title: "",
-                  category: "free_board",
+                  category: activeTab === "notice" ? "notice" : "free_board",
                   linked_news_id: "",
                 },
               );
@@ -7443,7 +8095,7 @@ const CommunityManagement: React.FC = () => {
 
       setFormData({
         title: "",
-        category: "free_board",
+        category: activeTab === "notice" ? "notice" : "free_board",
         linked_news_id: "",
       });
       setHtmlContent("");
@@ -7456,7 +8108,7 @@ const CommunityManagement: React.FC = () => {
     setEditingPost(null);
     setFormData({
       title: "",
-      category: "free_board",
+      category: activeTab === "notice" ? "notice" : "free_board",
       linked_news_id: "",
     });
     setHtmlContent("");
@@ -7494,7 +8146,7 @@ const CommunityManagement: React.FC = () => {
       const postData: api.CommunityPostData = {
         title: formData.title,
         content: contentBlocks,
-        category: formData.category,
+        category: activeTab === "notice" ? "notice" : formData.category,
         linked_news_id: formData.linked_news_id || undefined,
         tags: [], // 커뮤니티는 태그 사용 안함
       };
@@ -7555,9 +8207,68 @@ const CommunityManagement: React.FC = () => {
             </select>
           </div>
           <button style={styles.addButton} onClick={() => openModal()}>
-            <span>+</span> 게시글 작성
+            <span>+</span> {activeTab === "notice" ? "공지사항 작성" : "게시글 작성"}
           </button>
         </div>
+      </div>
+
+      {/* 탭 UI */}
+      <div
+        style={{
+          display: "flex",
+          gap: "4px",
+          marginBottom: "24px",
+          borderBottom: `2px solid ${colors.gray[200]}`,
+        }}
+      >
+        <button
+          onClick={() => {
+            setActiveTab("posts");
+            setPage(1);
+            setSelectedCategory("");
+          }}
+          style={{
+            padding: "12px 24px",
+            backgroundColor: "transparent",
+            border: "none",
+            borderBottom:
+              activeTab === "posts"
+                ? `3px solid ${colors.primary}`
+                : "3px solid transparent",
+            color: activeTab === "posts" ? colors.primary : colors.gray[600],
+            fontSize: "16px",
+            fontWeight: activeTab === "posts" ? "600" : "500",
+            cursor: "pointer",
+            transition: "all 0.2s",
+            marginBottom: "-2px",
+          }}
+        >
+          커뮤니티 게시글
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab("notice");
+            setPage(1);
+            setSelectedCategory("");
+          }}
+          style={{
+            padding: "12px 24px",
+            backgroundColor: "transparent",
+            border: "none",
+            borderBottom:
+              activeTab === "notice"
+                ? `3px solid ${colors.primary}`
+                : "3px solid transparent",
+            color: activeTab === "notice" ? colors.primary : colors.gray[600],
+            fontSize: "16px",
+            fontWeight: activeTab === "notice" ? "600" : "500",
+            cursor: "pointer",
+            transition: "all 0.2s",
+            marginBottom: "-2px",
+          }}
+        >
+          공지사항
+        </button>
       </div>
 
       <div
@@ -7589,26 +8300,28 @@ const CommunityManagement: React.FC = () => {
             borderRadius: "8px",
           }}
         />
-        <select
-          value={selectedCategory}
-          onChange={(e) => {
-            setSelectedCategory(e.target.value);
-            setPage(1);
-          }}
-          style={{
-            ...styles.input,
-            width: "180px",
-            padding: "10px 12px",
-            fontSize: "14px",
-            border: `1px solid ${colors.gray[300]}`,
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
-        >
-          <option value="">모든 게시판</option>
-          <option value="free_board">자유게시판</option>
-          <option value="news_discussion">뉴스토론</option>
-        </select>
+        {activeTab === "posts" && (
+          <select
+            value={selectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setPage(1);
+            }}
+            style={{
+              ...styles.input,
+              width: "180px",
+              padding: "10px 12px",
+              fontSize: "14px",
+              border: `1px solid ${colors.gray[300]}`,
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            <option value="">모든 게시판</option>
+            <option value="free_board">자유게시판</option>
+            <option value="news_discussion">뉴스토론</option>
+          </select>
+        )}
         <button
           onClick={() => {
             setSearchQuery(searchInput);
@@ -7650,7 +8363,7 @@ const CommunityManagement: React.FC = () => {
 
       <div style={styles.tableContainer}>
         {!data?.posts || data.posts.length === 0 ? (
-          <EmptyState message="등록된 게시글이 없습니다." icon="" />
+          <EmptyState message={activeTab === "notice" ? "등록된 공지사항이 없습니다." : "등록된 게시글이 없습니다."} icon={activeTab === "notice" ? "📢" : ""} />
         ) : (
           <>
             <div style={styles.tableWrapper}>
@@ -7882,20 +8595,34 @@ const CommunityManagement: React.FC = () => {
                   />
                 </div>
 
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>카테고리 *</label>
-                  <select
-                    style={styles.input}
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
-                    }
-                    required
-                  >
-                    <option value="free_board">자유게시판</option>
-                    <option value="news_discussion">뉴스토론</option>
-                  </select>
-                </div>
+                {activeTab === "posts" && (
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>카테고리 *</label>
+                    <select
+                      style={styles.input}
+                      value={formData.category}
+                      onChange={(e) =>
+                        setFormData({ ...formData, category: e.target.value })
+                      }
+                      disabled={!!editingPost}
+                      required
+                    >
+                      <option value="free_board">자유게시판</option>
+                      <option value="news_discussion">뉴스토론</option>
+                    </select>
+                    {editingPost && (
+                      <p
+                        style={{
+                          fontSize: "12px",
+                          color: colors.gray[500],
+                          marginTop: "4px",
+                        }}
+                      >
+                        카테고리는 수정할 수 없습니다.
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {!editingPost && (
                   <div style={styles.formGroup}>
@@ -9304,6 +10031,7 @@ type TabType =
   | "user"
   | "calendar"
   | "community"
+  | "customer-support"
   | "tags"
   | "terms"
   | "reports"
@@ -9320,8 +10048,9 @@ const MobileNav: React.FC<{
     { id: "news" as TabType, label: "뉴스 관리", icon: "" },
     { id: "report" as TabType, label: "리포트 관리", icon: "" },
     { id: "user" as TabType, label: "회원 관리", icon: "" },
-    { id: "calendar" as TabType, label: "캘린더 관리", icon: "" },
-    { id: "community" as TabType, label: "커뮤니티 관리", icon: "" },
+    { id: "calendar" as TabType, label: "캘린더", icon: "" },
+    { id: "community" as TabType, label: "커뮤니티", icon: "" },
+    { id: "customer-support" as TabType, label: "고객센터", icon: "💬" },
     { id: "comments" as TabType, label: "댓글 관리", icon: "" },
     { id: "tags" as TabType, label: "태그 관리", icon: "" },
     { id: "terms" as TabType, label: "약관 설정", icon: "" },
@@ -12957,6 +13686,8 @@ const AdminApp: React.FC = () => {
         return <CalendarManagement />;
       case "community":
         return <CommunityManagement />;
+      case "customer-support":
+        return <CustomerSupportManagement />;
       case "tags":
         return <TagManagement />;
       case "terms":
@@ -13048,7 +13779,7 @@ const AdminApp: React.FC = () => {
                 onMouseEnter={() => setHoveredNavItem("calendar")}
                 onMouseLeave={() => setHoveredNavItem(null)}
               >
-                캘린더 관리
+                캘린더
               </button>
               <button
                 style={{
@@ -13063,7 +13794,22 @@ const AdminApp: React.FC = () => {
                 onMouseEnter={() => setHoveredNavItem("community")}
                 onMouseLeave={() => setHoveredNavItem(null)}
               >
-                커뮤니티 관리
+                커뮤니티
+              </button>
+              <button
+                style={{
+                  ...styles.navItem,
+                  ...(activeTab === "customer-support" ? styles.navItemActive : {}),
+                  ...(hoveredNavItem === "customer-support" &&
+                  activeTab !== "customer-support"
+                    ? styles.navItemHover
+                    : {}),
+                }}
+                onClick={() => setActiveTab("customer-support")}
+                onMouseEnter={() => setHoveredNavItem("customer-support")}
+                onMouseLeave={() => setHoveredNavItem(null)}
+              >
+                고객센터
               </button>
               <button
                 style={{
@@ -13182,7 +13928,7 @@ const AdminApp: React.FC = () => {
               >
                 <span
                   style={{
-                    maxWidth: "150px",
+                    maxWidth: "80px",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",

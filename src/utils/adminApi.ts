@@ -444,11 +444,11 @@ export interface CommunityUpdateData {
 
 // Community APIs
 export const getCommunityPosts = async (
-  page: number = 1, 
+  page: number = 1,
   pageSize: number = 20,
   search?: string,
-  authorId?: string,
   category?: string,
+  authorId?: string,
   sort: string = 'created_at_desc',
   includeDeleted: boolean = false
 ) => {
@@ -458,10 +458,10 @@ export const getCommunityPosts = async (
     sort: sort,
   });
   if (search) params.append('search', search);
-  if (authorId) params.append('author_id', authorId);
   if (category) params.append('category', category);
+  if (authorId) params.append('author_id', authorId);
   if (includeDeleted) params.append('include_deleted', 'true');
-  
+
   return apiCall(`/api/community/list?${params}`);
 };
 
