@@ -7790,66 +7790,137 @@ const CustomerSupportDetailModal: React.FC<{
                   <div style={{ marginBottom: "16px" }}>
                     {commentsData?.comments && Array.isArray(commentsData.comments) && commentsData.comments.length > 0 ? (
                       commentsData.comments.map((comment: any, index: number) => (
-                        <div
-                          key={comment.id}
-                          style={{
-                            padding: "12px",
-                            marginBottom: index < commentsData.comments.length - 1 ? "8px" : "0",
-                            backgroundColor: comment.is_deleted ? colors.gray[100] : colors.white,
-                            borderRadius: "6px",
-                            border: `1px solid ${comment.is_deleted ? colors.gray[300] : colors.gray[200]}`,
-                          }}
-                        >
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                                <span style={{ fontWeight: "600", fontSize: "14px", color: colors.gray[800] }}>
-                                  {comment.author_name}
-                                </span>
-                                <span style={{ color: colors.gray[500], fontSize: "12px" }}>
-                                  {formatDate(comment.created_at)}
-                                </span>
-                                {comment.is_deleted && (
-                                  <span
-                                    style={{
-                                      padding: "2px 6px",
-                                      backgroundColor: colors.gray[300],
-                                      color: colors.gray[700],
-                                      borderRadius: "3px",
-                                      fontSize: "11px",
-                                      fontWeight: "500",
-                                    }}
-                                  >
-                                    삭제됨
+                        <div key={comment.id}>
+                          <div
+                            style={{
+                              padding: "12px",
+                              marginBottom: "8px",
+                              backgroundColor: comment.is_deleted ? colors.gray[100] : colors.white,
+                              borderRadius: "6px",
+                              border: `1px solid ${comment.is_deleted ? colors.gray[300] : colors.gray[200]}`,
+                            }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                                  <span style={{ fontWeight: "600", fontSize: "14px", color: colors.gray[800] }}>
+                                    {comment.author_name}
                                   </span>
-                                )}
+                                  <span style={{ color: colors.gray[500], fontSize: "12px" }}>
+                                    {formatDate(comment.created_at)}
+                                  </span>
+                                  {comment.is_deleted && (
+                                    <span
+                                      style={{
+                                        padding: "2px 6px",
+                                        backgroundColor: colors.gray[300],
+                                        color: colors.gray[700],
+                                        borderRadius: "3px",
+                                        fontSize: "11px",
+                                        fontWeight: "500",
+                                      }}
+                                    >
+                                      삭제됨
+                                    </span>
+                                  )}
+                                </div>
+                                <div style={{ color: colors.gray[700], fontSize: "14px", lineHeight: "1.5" }}>
+                                  {comment.content && renderContent(comment.content)}
+                                </div>
                               </div>
-                              <div style={{ color: colors.gray[700], fontSize: "14px", lineHeight: "1.5" }}>
-                                {comment.content && renderContent(comment.content)}
-                              </div>
+                              {!comment.is_deleted && (
+                                <button
+                                  onClick={() => {
+                                    if (window.confirm("이 댓글을 삭제하시겠습니까?")) {
+                                      deleteCommentMutation.mutate(comment.id);
+                                    }
+                                  }}
+                                  style={{
+                                    padding: "6px 12px",
+                                    fontSize: "12px",
+                                    backgroundColor: colors.red[500],
+                                    color: colors.white,
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    cursor: "pointer",
+                                    marginLeft: "12px",
+                                  }}
+                                >
+                                  삭제
+                                </button>
+                              )}
                             </div>
-                            {!comment.is_deleted && (
-                              <button
-                                onClick={() => {
-                                  if (window.confirm("이 댓글을 삭제하시겠습니까?")) {
-                                    deleteCommentMutation.mutate(comment.id);
-                                  }
-                                }}
-                                style={{
-                                  padding: "6px 12px",
-                                  fontSize: "12px",
-                                  backgroundColor: colors.red[500],
-                                  color: colors.white,
-                                  border: "none",
-                                  borderRadius: "4px",
-                                  cursor: "pointer",
-                                  marginLeft: "12px",
-                                }}
-                              >
-                                삭제
-                              </button>
-                            )}
                           </div>
+
+                          {comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0 && (
+                            <div style={{ marginLeft: "32px", marginBottom: "8px" }}>
+                              {comment.replies.map((reply: any) => (
+                                <div
+                                  key={reply.id}
+                                  style={{
+                                    padding: "12px",
+                                    marginBottom: "8px",
+                                    backgroundColor: reply.is_deleted ? colors.gray[100] : colors.blue[50],
+                                    borderRadius: "6px",
+                                    border: `1px solid ${reply.is_deleted ? colors.gray[300] : colors.blue[200]}`,
+                                    borderLeft: `3px solid ${colors.blue[500]}`,
+                                  }}
+                                >
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                                    <div style={{ flex: 1 }}>
+                                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                                        <span style={{ fontSize: "12px", color: colors.gray[500] }}>↳</span>
+                                        <span style={{ fontWeight: "600", fontSize: "13px", color: colors.gray[800] }}>
+                                          {reply.author_name}
+                                        </span>
+                                        <span style={{ color: colors.gray[500], fontSize: "11px" }}>
+                                          {formatDate(reply.created_at)}
+                                        </span>
+                                        {reply.is_deleted && (
+                                          <span
+                                            style={{
+                                              padding: "2px 6px",
+                                              backgroundColor: colors.gray[300],
+                                              color: colors.gray[700],
+                                              borderRadius: "3px",
+                                              fontSize: "10px",
+                                              fontWeight: "500",
+                                            }}
+                                          >
+                                            삭제됨
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div style={{ color: colors.gray[700], fontSize: "13px", lineHeight: "1.5" }}>
+                                        {reply.content && renderContent(reply.content)}
+                                      </div>
+                                    </div>
+                                    {!reply.is_deleted && (
+                                      <button
+                                        onClick={() => {
+                                          if (window.confirm("이 대댓글을 삭제하시겠습니까?")) {
+                                            deleteCommentMutation.mutate(reply.id);
+                                          }
+                                        }}
+                                        style={{
+                                          padding: "4px 10px",
+                                          fontSize: "11px",
+                                          backgroundColor: colors.red[500],
+                                          color: colors.white,
+                                          border: "none",
+                                          borderRadius: "4px",
+                                          cursor: "pointer",
+                                          marginLeft: "12px",
+                                        }}
+                                      >
+                                        삭제
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))
                     ) : (
@@ -10183,6 +10254,7 @@ const UserReportsManagement: React.FC = () => {
   );
   const [showProcessModal, setShowProcessModal] = useState(false);
   const [showReporterDetailModal, setShowReporterDetailModal] = useState(false);
+  const [showCommentDetailModal, setShowCommentDetailModal] = useState(false);
   const [selectedReporter, setSelectedReporter] = useState<{
     id: string;
     name: string;
@@ -10782,17 +10854,55 @@ const UserReportsManagement: React.FC = () => {
                     >
                       <button
                         type="button"
-                        onClick={() => {
+                        onClick={async () => {
                           // 원본 게시글/댓글로 이동 (새 탭)
+                          console.log("Selected Report:", selectedReport);
+
                           if (selectedReport.target_type === "NEWS_COMMENT") {
-                            window.open(
-                              `https://www.saveticker.com/news/${selectedReport.target_id}`,
-                              "_blank",
-                            );
-                          } else if (
-                            selectedReport.target_type === "COMMUNITY_POST" ||
-                            selectedReport.target_type === "COMMUNITY_COMMENT"
-                          ) {
+                            // 뉴스 댓글인 경우, admin API로 댓글 정보 조회
+                            try {
+                              const response = await api.getCommentsList(1, 100, undefined, undefined, undefined, 'news');
+                              console.log("All comments:", response);
+
+                              // 모든 댓글에서 해당 댓글 찾기
+                              const comments = Array.isArray(response.comments) ? response.comments : [];
+                              const comment = comments.find((c: any) => c.id === selectedReport.target_id);
+
+                              if (comment && comment.target_id) {
+                                window.open(
+                                  `https://www.saveticker.com/news/${comment.target_id}#comment-${selectedReport.target_id}`,
+                                  "_blank",
+                                );
+                              } else {
+                                alert("댓글 정보를 찾을 수 없습니다. 삭제된 댓글일 수 있습니다.");
+                              }
+                            } catch (error) {
+                              console.error("Error fetching comment:", error);
+                              alert("댓글 정보를 불러오는데 실패했습니다.");
+                            }
+                          } else if (selectedReport.target_type === "COMMUNITY_COMMENT") {
+                            // 커뮤니티 댓글인 경우
+                            try {
+                              const response = await api.getCommentsList(1, 100, undefined, undefined, undefined, 'community');
+                              console.log("All comments:", response);
+
+                              // 모든 댓글에서 해당 댓글 찾기
+                              const comments = Array.isArray(response.comments) ? response.comments : [];
+                              const comment = comments.find((c: any) => c.id === selectedReport.target_id);
+
+                              if (comment && comment.target_id) {
+                                window.open(
+                                  `https://www.saveticker.com/community/${comment.target_id}#comment-${selectedReport.target_id}`,
+                                  "_blank",
+                                );
+                              } else {
+                                alert("댓글 정보를 찾을 수 없습니다. 삭제된 댓글일 수 있습니다.");
+                              }
+                            } catch (error) {
+                              console.error("Error fetching comment:", error);
+                              alert("댓글 정보를 불러오는데 실패했습니다.");
+                            }
+                          } else if (selectedReport.target_type === "COMMUNITY_POST") {
                             window.open(
                               `https://www.saveticker.com/community/${selectedReport.target_id}`,
                               "_blank",
